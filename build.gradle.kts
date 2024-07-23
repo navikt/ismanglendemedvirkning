@@ -11,6 +11,7 @@ val logbackVersion = "1.5.6"
 val logstashEncoderVersion = "7.4"
 val micrometerRegistryVersion = "1.12.2"
 val jacksonDatatypeVersion = "2.17.2"
+val kafkaVersion = "3.7.0"
 val ktorVersion = "2.3.12"
 val spekVersion = "2.0.19"
 val mockkVersion = "1.13.11"
@@ -54,6 +55,10 @@ dependencies {
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
     testImplementation("io.zonky.test:embedded-postgres:$postgresEmbeddedVersion")
+
+    // Kafka
+    val excludeLog4j = fun ExternalModuleDependency.() { exclude(group = "log4j") }
+    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion", excludeLog4j)
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeVersion")

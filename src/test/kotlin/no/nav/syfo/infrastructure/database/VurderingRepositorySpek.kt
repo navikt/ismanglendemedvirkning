@@ -13,14 +13,14 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.util.UUID
 
-class ManglendeMedvirkningRepositorySpek : Spek({
+class VurderingRepositorySpek : Spek({
 
-    describe(ManglendeMedvirkningRepositorySpek::class.java.simpleName) {
+    describe(VurderingRepositorySpek::class.java.simpleName) {
         with(TestApplicationEngine()) {
             start()
             val externalMockEnvironment = ExternalMockEnvironment.instance
             val database = externalMockEnvironment.database
-            val manglendeMedvirkningRepository = VurderingRepository(database = database)
+            val vurderingRepository = VurderingRepository(database = database)
             val pdf = byteArrayOf(0x2E, 100)
 
             afterEachTest { database.dropData() }
@@ -36,7 +36,7 @@ class ManglendeMedvirkningRepositorySpek : Spek({
                         document = emptyList(),
                         journalpostId = null,
                     )
-                    val savedVurdering = manglendeMedvirkningRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
+                    val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
                     savedVurdering!!.personident shouldBeEqualTo vurdering.personident
                     savedVurdering.veilederident shouldBeEqualTo vurdering.veilederident
                     savedVurdering.begrunnelse shouldBeEqualTo vurdering.begrunnelse
@@ -60,7 +60,7 @@ class ManglendeMedvirkningRepositorySpek : Spek({
                             now.toLocalDate(),
                         ),
                     )
-                    val savedVurdering = manglendeMedvirkningRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
+                    val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
                     when (savedVurdering) {
                         is ManglendeMedvirkningVurdering.Forhandsvarsel -> {
                             savedVurdering.personident shouldBeEqualTo vurdering.personident

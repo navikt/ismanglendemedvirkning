@@ -25,6 +25,10 @@ fun testEnvironment() = Environment(
             baseUrl = "isTilgangskontrollUrl",
             clientId = "dev-gcp.teamsykefravr.istilgangskontroll",
         ),
+        pdl = ClientEnvironment(
+            baseUrl = "pdlUrl",
+            clientId = "pdlClientId",
+        ),
     ),
     electorPath = "electorPath",
 )

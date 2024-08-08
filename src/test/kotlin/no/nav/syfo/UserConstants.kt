@@ -1,6 +1,7 @@
 package no.nav.syfo
 
 import no.nav.syfo.domain.Personident
+import no.nav.syfo.domain.Veilederident
 
 object UserConstants {
     val ARBEIDSTAKER_PERSONIDENT = Personident("12345678910")
@@ -8,7 +9,7 @@ object UserConstants {
     val ARBEIDSTAKER_PERSONIDENT_NAME_WITH_DASH = Personident("11111111234")
     val ARBEIDSTAKER_PERSONIDENT_NO_NAME = Personident("11111111222")
     val ARBEIDSTAKER_PERSONIDENT_PDL_FAILS = Personident("11111111666")
-    const val VEILEDER_IDENT = "Z999999"
+    val VEILEDER_IDENT = Veilederident("Z999999")
 
     const val PERSON_FORNAVN = "Fornavn"
     const val PERSON_MELLOMNAVN = "Mellomnavn"

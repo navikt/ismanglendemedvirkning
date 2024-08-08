@@ -2,6 +2,7 @@ package no.nav.syfo.api
 
 import io.ktor.server.application.*
 import no.nav.syfo.ExternalMockEnvironment
+import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 
 fun Application.testApiModule(
@@ -13,6 +14,7 @@ fun Application.testApiModule(
         clientEnvironment = externalMockEnvironment.environment.clients.istilgangskontroll,
         httpClient = externalMockEnvironment.mockHttpClient,
     )
+    val vurderingService = VurderingService(vurderingRepository = externalMockEnvironment.vurderingRepository)
 
     this.apiModule(
         applicationState = externalMockEnvironment.applicationState,
@@ -20,5 +22,6 @@ fun Application.testApiModule(
         wellKnownInternalAzureAD = externalMockEnvironment.wellKnownInternalAzureAD,
         database = database,
         veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+        vurderingService = vurderingService,
     )
 }

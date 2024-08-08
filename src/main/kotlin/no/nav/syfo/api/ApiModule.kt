@@ -19,6 +19,8 @@ import no.nav.syfo.api.auth.JwtIssuerType
 import no.nav.syfo.api.auth.installJwtAuthentication
 import no.nav.syfo.api.endpoints.metricEndpoints
 import no.nav.syfo.api.endpoints.podEndpoints
+import no.nav.syfo.api.endpoints.registerManglendeMedvirkningEndpoints
+import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.NAV_CALL_ID_HEADER
 import no.nav.syfo.infrastructure.clients.veiledertilgang.ForbiddenAccessVeilederException
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
@@ -37,6 +39,7 @@ fun Application.apiModule(
     wellKnownInternalAzureAD: WellKnown,
     database: DatabaseInterface,
     veilederTilgangskontrollClient: VeilederTilgangskontrollClient,
+    vurderingService: VurderingService,
 ) {
     installMetrics()
     installCallId()
@@ -56,6 +59,10 @@ fun Application.apiModule(
     routing {
         podEndpoints(applicationState = applicationState, database = database)
         metricEndpoints()
+        registerManglendeMedvirkningEndpoints(
+            veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+            vurderingService = vurderingService
+        )
     }
 }
 
@@ -110,7 +117,7 @@ fun Application.installStatusPages() {
                         cause.response.status
                     }
 
-                    is IllegalArgumentException, is BadRequestException, -> {
+                    is IllegalArgumentException, is BadRequestException -> {
                         HttpStatusCode.BadRequest
                     }
 

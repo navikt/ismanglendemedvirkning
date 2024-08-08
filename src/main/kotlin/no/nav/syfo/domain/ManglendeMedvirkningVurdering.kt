@@ -1,6 +1,7 @@
 package no.nav.syfo.domain
 
-import no.nav.syfo.domain.api.DocumentComponent
+import no.nav.syfo.infrastructure.clients.dokarkiv.dto.BrevkodeType
+import no.nav.syfo.infrastructure.clients.dokarkiv.dto.JournalpostType
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -126,3 +127,20 @@ data class Varsel(
     val createdAt: OffsetDateTime,
     val svarfrist: LocalDate,
 )
+
+fun VurderingType.dokumentTittel(): String = when (this) {
+    VurderingType.FORHANDSVARSEL -> "Forhåndsvarsel om stans av sykepenger"
+    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL -> "Vurdering av § 8-8 manglende medvirkning"
+    VurderingType.STANS -> "Innstilling om stans"
+}
+
+fun VurderingType.brevkode(): BrevkodeType = when (this) {
+    VurderingType.FORHANDSVARSEL -> BrevkodeType.MANGLENDE_MEDVIRKNING_FORHANDSVARSEL
+    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL -> BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING
+    VurderingType.STANS -> BrevkodeType.MANGLENDE_MEDVIRKNING_STANS
+}
+
+fun VurderingType.journalpostType(): JournalpostType = when (this) {
+    VurderingType.FORHANDSVARSEL, VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL -> JournalpostType.UTGAAENDE
+    VurderingType.STANS -> JournalpostType.NOTAT
+}

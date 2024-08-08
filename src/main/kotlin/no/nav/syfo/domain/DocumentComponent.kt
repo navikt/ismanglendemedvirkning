@@ -1,4 +1,4 @@
-package no.nav.syfo.domain.api
+package no.nav.syfo.domain
 
 data class DocumentComponent(
     val type: DocumentComponentType,

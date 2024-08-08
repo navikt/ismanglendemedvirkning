@@ -29,6 +29,10 @@ fun testEnvironment() = Environment(
             baseUrl = "pdlUrl",
             clientId = "pdlClientId",
         ),
+        dokarkiv = ClientEnvironment(
+            baseUrl = "dokarkivUrl",
+            clientId = "dokarkivClientId",
+        )
     ),
     electorPath = "electorPath",
 )

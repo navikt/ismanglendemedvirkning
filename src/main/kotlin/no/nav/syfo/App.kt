@@ -6,11 +6,13 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.syfo.api.apiModule
+import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.infrastructure.clients.wellknown.getWellKnown
 import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
+import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -43,6 +45,9 @@ fun main() {
                 databaseModule(
                     databaseEnvironment = environment.database,
                 )
+                val vurderingRepository = VurderingRepository(
+                    database = applicationDatabase,
+                )
 
                 apiModule(
                     applicationState = applicationState,
@@ -50,6 +55,7 @@ fun main() {
                     wellKnownInternalAzureAD = wellKnownInternalAzureAD,
                     database = applicationDatabase,
                     veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+                    vurderingService = VurderingService(vurderingRepository = vurderingRepository)
                 )
             }
         }

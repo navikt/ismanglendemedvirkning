@@ -3,6 +3,7 @@ package no.nav.syfo
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.clients.wellknown.WellKnown
 import no.nav.syfo.infrastructure.database.TestDatabase
+import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.infrastructure.mock.mockHttpClient
 import java.nio.file.Paths
 
@@ -25,6 +26,7 @@ class ExternalMockEnvironment private constructor() {
         azureEnvironment = environment.azure,
         httpClient = mockHttpClient,
     )
+    val vurderingRepository = VurderingRepository(database)
 
     companion object {
         val instance: ExternalMockEnvironment = ExternalMockEnvironment()

@@ -1,6 +1,6 @@
-package no.nav.syfo.aktivitetskrav.api
+package no.nav.syfo.domain.api
 
-data class DocumentComponentDTO(
+data class DocumentComponent(
     val type: DocumentComponentType,
     val key: String? = null,
     val title: String?,
@@ -11,11 +11,11 @@ data class DocumentComponentDTO(
     }
 }
 
-fun List<DocumentComponentDTO>.sanitizeForPdfGen(): List<DocumentComponentDTO> = this.map {
+fun List<DocumentComponent>.sanitizeForPdfGen(): List<DocumentComponent> = this.map {
     it.copy(
         texts = it.texts.map { text ->
             text.toCharArray()
-                .filter { char -> char !in DocumentComponentDTO.illegalCharacters }
+                .filter { char -> char !in DocumentComponent.illegalCharacters }
                 .joinToString("")
         }
     )

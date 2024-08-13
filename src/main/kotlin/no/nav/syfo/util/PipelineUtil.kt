@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import io.ktor.http.*
 import io.ktor.server.application.*
 import no.nav.syfo.domain.Personident
+import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.infrastructure.NAV_CALL_ID_HEADER
 import no.nav.syfo.infrastructure.NAV_PERSONIDENT_HEADER
 
@@ -20,9 +21,10 @@ fun ApplicationCall.getConsumerClientId(): String? =
         JWT.decode(it).claims[JWT_CLAIM_AZP]?.asString()
     }
 
-fun ApplicationCall.getNAVIdent(): String {
+fun ApplicationCall.getNAVIdent(): Veilederident {
     val token = getBearerHeader() ?: throw Error("No Authorization header supplied")
     return JWT.decode(token).claims[JWT_CLAIM_NAVIDENT]?.asString()
+        ?.let { Veilederident(it) }
         ?: throw Error("Missing NAVident in private claims")
 }
 

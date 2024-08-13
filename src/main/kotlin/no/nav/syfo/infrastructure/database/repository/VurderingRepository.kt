@@ -1,13 +1,14 @@
 package no.nav.syfo.infrastructure.database.repository
 
 import com.fasterxml.jackson.core.type.TypeReference
-import no.nav.syfo.aktivitetskrav.api.DocumentComponentDTO
 import no.nav.syfo.application.IVurderingRepository
 import no.nav.syfo.domain.JournalpostId
 import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
-import no.nav.syfo.domain.Status
 import no.nav.syfo.domain.Varsel
+import no.nav.syfo.domain.Veilederident
+import no.nav.syfo.domain.VurderingType
+import no.nav.syfo.domain.api.DocumentComponent
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
 import no.nav.syfo.util.configuredJacksonMapper
@@ -26,7 +27,7 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
     override fun saveManglendeMedvirkningVurdering(
         vurdering: ManglendeMedvirkningVurdering,
         vurderingPdf: ByteArray,
-    ): ManglendeMedvirkningVurdering? =
+    ): ManglendeMedvirkningVurdering =
         database.connection.use { connection ->
             val pVurdering = connection.saveVurdering(vurdering)
             val pVarsel = when (vurdering) {
@@ -45,8 +46,8 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             it.setString(2, vurdering.personident.value)
             it.setObject(3, vurdering.createdAt)
             it.setObject(4, vurdering.createdAt)
-            it.setString(5, vurdering.veilederident)
-            it.setString(6, vurdering.status.name)
+            it.setString(5, vurdering.veilederident.value)
+            it.setString(6, vurdering.vurderingType.name)
             it.setString(7, vurdering.begrunnelse)
             it.setObject(8, mapper.writeValueAsString(vurdering.document))
             it.setNull(9, Types.VARCHAR)
@@ -146,12 +147,12 @@ private fun ResultSet.toPVurdering(): PVurdering =
         personident = Personident(getString("personident")),
         createdAt = getObject("created_at", OffsetDateTime::class.java),
         updatedAt = getObject("created_at", OffsetDateTime::class.java),
-        veilederident = getString("veilederident"),
-        type = Status.valueOf(getString("type")),
+        veilederident = Veilederident(getString("veilederident")),
+        type = VurderingType.valueOf(getString("type")),
         begrunnelse = getString("begrunnelse"),
         document = configuredJacksonMapper().readValue(
             getString("document"),
-            object : TypeReference<List<DocumentComponentDTO>>() {}
+            object : TypeReference<List<DocumentComponent>>() {}
         ),
         journalpostId = getString("journalpost_id")?.let { JournalpostId(it) },
         publishedAt = getObject("published_at", OffsetDateTime::class.java),

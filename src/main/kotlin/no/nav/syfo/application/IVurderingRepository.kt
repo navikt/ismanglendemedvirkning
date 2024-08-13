@@ -6,5 +6,5 @@ interface IVurderingRepository {
     fun saveManglendeMedvirkningVurdering(
         manglendeMedvirkning: ManglendeMedvirkningVurdering,
         vurderingPdf: ByteArray,
-    ): ManglendeMedvirkningVurdering?
+    ): ManglendeMedvirkningVurdering
 }

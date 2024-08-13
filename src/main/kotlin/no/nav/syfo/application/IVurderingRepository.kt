@@ -7,4 +7,8 @@ interface IVurderingRepository {
         manglendeMedvirkning: ManglendeMedvirkningVurdering,
         vurderingPdf: ByteArray,
     ): ManglendeMedvirkningVurdering
+
+    fun setJournalpostId(vurdering: ManglendeMedvirkningVurdering)
+
+    fun getNotJournalforteVurderinger(): List<Pair<ManglendeMedvirkningVurdering, ByteArray>>
 }

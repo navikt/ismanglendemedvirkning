@@ -1,15 +1,11 @@
 package no.nav.syfo.application
 
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
-import no.nav.syfo.domain.Personident
-import no.nav.syfo.domain.Veilederident
-import no.nav.syfo.domain.VurderingType
-import no.nav.syfo.domain.DocumentComponent
-import no.nav.syfo.infrastructure.database.repository.VurderingRepository
+import no.nav.syfo.domain.*
 import java.time.LocalDate
 
 class VurderingService(
-    private val vurderingRepository: VurderingRepository,
+    private val vurderingRepository: IVurderingRepository,
+    private val journalforingService: IJournalforingService,
 ) {
 
     fun createNewVurdering(
@@ -33,13 +29,32 @@ class VurderingService(
         // TODO: Get vurdering pdf from ispdfgen
 
         val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(
-            vurdering = newVurdering,
+            manglendeMedvirkning = newVurdering,
             vurderingPdf = byteArrayOf(),
         )
 
-        // TODO: Journalfor vurdering
         // TODO: Publish new vurdering
 
         return savedVurdering
+    }
+
+    suspend fun journalforVurderinger(): List<Result<ManglendeMedvirkningVurdering>> {
+        val notJournalforteVurderinger = vurderingRepository.getNotJournalforteVurderinger()
+
+        return notJournalforteVurderinger.map { (vurdering, pdf) ->
+            runCatching {
+                val journalpostId = journalforingService.journalfor(
+                    personident = vurdering.personident,
+                    pdf = pdf,
+                    vurdering = vurdering,
+                )
+                val journalfortVurdering = vurdering.journalfor(
+                    journalpostId = JournalpostId(journalpostId.toString()),
+                )
+                vurderingRepository.setJournalpostId(journalfortVurdering)
+
+                journalfortVurdering
+            }
+        }
     }
 }

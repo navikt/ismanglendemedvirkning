@@ -2,7 +2,7 @@ package no.nav.syfo.api.model
 
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.VurderingType
-import no.nav.syfo.domain.api.DocumentComponent
+import no.nav.syfo.domain.DocumentComponent
 import java.time.LocalDate
 
 data class NewVurderingRequestDTO(

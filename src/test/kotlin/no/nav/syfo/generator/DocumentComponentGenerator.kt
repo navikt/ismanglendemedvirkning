@@ -1,7 +1,7 @@
 package no.nav.syfo.generator
 
-import no.nav.syfo.domain.api.DocumentComponent
-import no.nav.syfo.domain.api.DocumentComponentType
+import no.nav.syfo.domain.DocumentComponent
+import no.nav.syfo.domain.DocumentComponentType
 
 fun generateDocumentComponent(fritekst: String, header: String = "Standard header") = listOf(
     DocumentComponent(

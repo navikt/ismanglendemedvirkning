@@ -4,7 +4,7 @@ import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.VurderingType
-import no.nav.syfo.domain.api.DocumentComponent
+import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import java.time.LocalDate
 

@@ -8,7 +8,7 @@ import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Varsel
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.VurderingType
-import no.nav.syfo.domain.api.DocumentComponent
+import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
 import no.nav.syfo.util.configuredJacksonMapper

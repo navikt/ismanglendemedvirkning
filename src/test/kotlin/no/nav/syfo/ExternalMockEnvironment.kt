@@ -1,6 +1,8 @@
 package no.nav.syfo
 
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
+import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
+import no.nav.syfo.infrastructure.clients.pdl.PdlClient
 import no.nav.syfo.infrastructure.clients.wellknown.WellKnown
 import no.nav.syfo.infrastructure.database.TestDatabase
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
@@ -24,6 +26,16 @@ class ExternalMockEnvironment private constructor() {
     val wellKnownInternalAzureAD = wellKnownInternalAzureAD()
     val azureAdClient = AzureAdClient(
         azureEnvironment = environment.azure,
+        httpClient = mockHttpClient,
+    )
+    val pdlClient = PdlClient(
+        azureAdClient = azureAdClient,
+        pdlEnvironment = environment.clients.pdl,
+        httpClient = mockHttpClient,
+    )
+    val dokarkivClient = DokarkivClient(
+        azureAdClient = azureAdClient,
+        dokarkivEnvironment = environment.clients.dokarkiv,
         httpClient = mockHttpClient,
     )
     val vurderingRepository = VurderingRepository(database)

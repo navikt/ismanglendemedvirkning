@@ -122,11 +122,11 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
     }
 }
 
-enum class VurderingType {
-    FORHANDSVARSEL,
-    OPPFYLT,
-    STANS,
-    IKKE_AKTUELL,
+enum class VurderingType(isActive: Boolean) {
+    FORHANDSVARSEL(true),
+    OPPFYLT(false),
+    STANS(false),
+    IKKE_AKTUELL(false),
 }
 
 data class Varsel(

@@ -2,13 +2,13 @@ package no.nav.syfo.infrastructure.database.repository
 
 import com.fasterxml.jackson.core.type.TypeReference
 import no.nav.syfo.application.IVurderingRepository
+import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.domain.JournalpostId
 import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Varsel
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.VurderingType
-import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
 import no.nav.syfo.util.configuredJacksonMapper
@@ -39,6 +39,20 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             connection.commit()
 
             pVurdering.toManglendeMedvirkningVurdering(pVarsel)
+        }
+
+    override fun updatePublishedAt(vurderingUUID: UUID) =
+        database.connection.use { connection ->
+            connection.prepareStatement(UPDATE_PUBLISHED_AT).use {
+                it.setObject(1, nowUTC())
+                it.setObject(2, nowUTC())
+                it.setString(3, vurderingUUID.toString())
+                val updated = it.executeUpdate()
+                if (updated != 1) {
+                    throw SQLException("Expected a single row to be updated, got update count $updated")
+                }
+            }
+            connection.commit()
         }
 
     override fun setJournalpostId(vurdering: ManglendeMedvirkningVurdering) = database.connection.use { connection ->
@@ -171,6 +185,11 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
                 published_at
             ) values (DEFAULT, ?, ?, ?, ?, ?, ?)
             RETURNING *
+            """
+
+        private const val UPDATE_PUBLISHED_AT =
+            """
+                UPDATE VURDERING SET updated_at=?, published_at=? WHERE uuid=?
             """
 
         private const val UPDATE_JOURNALPOST_ID =

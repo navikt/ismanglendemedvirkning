@@ -1,0 +1,40 @@
+name: kafka
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/kafka-manglende-medvirkning.yaml'
+      - '.nais/kafka/**'
+
+permissions:
+  id-token: write
+
+jobs:
+  deploy-kafka-manglende-medvirkning-dev:
+    name: Deploy Kafka topics to dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy manglende-medvirkning-vurdering topic to dev
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/kafka/manglende-medvirkning-vurdering.yaml
+          VARS: .nais/kafka/dev.json
+
+  deploy-kafka-manglende-medvirkning-prod:
+    name: Deploy Kafka topics to prod-gcp
+    needs: deploy-kafka-manglende-medvirkning-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy manglende-medvirkning-vurdering topic to prod
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/kafka/manglende-medvirkning-vurdering.yaml
+          VARS: .nais/kafka/prod.json

@@ -4,6 +4,7 @@ import no.nav.syfo.infrastructure.clients.ClientEnvironment
 import no.nav.syfo.infrastructure.clients.ClientsEnvironment
 import no.nav.syfo.infrastructure.clients.azuread.AzureEnvironment
 import no.nav.syfo.infrastructure.database.DatabaseEnvironment
+import no.nav.syfo.infrastructure.kafka.KafkaEnvironment
 
 const val NAIS_DATABASE_ENV_PREFIX = "NAIS_DATABASE_ISMANGLENDEMEDVIRKNING_ISMANGLENDEMEDVIRKNING_DB"
 
@@ -39,11 +40,18 @@ data class Environment(
                 clientId = getEnvVar("DOKARKIV_CLIENT_ID")
             ),
         ),
+    val kafka: KafkaEnvironment = KafkaEnvironment(
+        aivenBootstrapServers = getEnvVar("KAFKA_BROKERS"),
+        aivenCredstorePassword = getEnvVar("KAFKA_CREDSTORE_PASSWORD"),
+        aivenKeystoreLocation = getEnvVar("KAFKA_KEYSTORE_PATH"),
+        aivenSecurityProtocol = "SSL",
+        aivenTruststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
+    ),
 )
 
 fun getEnvVar(
     varName: String,
-    defaultValue: String? = null
+    defaultValue: String? = null,
 ) = System.getenv(varName) ?: defaultValue ?: throw RuntimeException("Missing required variable \"$varName\"")
 
 fun isLocal() = getEnvVar("KTOR_ENV", "local") == "local"

@@ -59,6 +59,13 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val journalpostId: JournalpostId?,
     ) : ManglendeMedvirkningVurdering(VurderingType.IKKE_AKTUELL)
 
+    fun journalfor(journalpostId: JournalpostId): ManglendeMedvirkningVurdering = when (this) {
+        is Forhandsvarsel -> this.copy(journalpostId = journalpostId)
+        is Oppfylt -> this.copy(journalpostId = journalpostId)
+        is Stans -> this.copy(journalpostId = journalpostId)
+        is IkkeAktuell -> this.copy(journalpostId = journalpostId)
+    }
+
     companion object {
 
         fun create(

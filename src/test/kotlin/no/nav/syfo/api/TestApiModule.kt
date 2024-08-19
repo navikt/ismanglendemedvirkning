@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
+import no.nav.syfo.infrastructure.journalforing.JournalforingService
 
 fun Application.testApiModule(
     externalMockEnvironment: ExternalMockEnvironment,
@@ -14,7 +15,14 @@ fun Application.testApiModule(
         clientEnvironment = externalMockEnvironment.environment.clients.istilgangskontroll,
         httpClient = externalMockEnvironment.mockHttpClient,
     )
-    val vurderingService = VurderingService(vurderingRepository = externalMockEnvironment.vurderingRepository)
+    val journalforingService = JournalforingService(
+        dokarkivClient = externalMockEnvironment.dokarkivClient,
+        pdlClient = externalMockEnvironment.pdlClient,
+    )
+    val vurderingService = VurderingService(
+        vurderingRepository = externalMockEnvironment.vurderingRepository,
+        journalforingService = journalforingService,
+    )
 
     this.apiModule(
         applicationState = externalMockEnvironment.applicationState,

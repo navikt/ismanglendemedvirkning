@@ -12,6 +12,7 @@ import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
 import no.nav.syfo.util.configuredJacksonMapper
+import no.nav.syfo.util.nowUTC
 import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
@@ -38,6 +39,34 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             connection.commit()
 
             pVurdering.toManglendeMedvirkningVurdering(pVarsel)
+        }
+
+    override fun setJournalpostId(vurdering: ManglendeMedvirkningVurdering) = database.connection.use { connection ->
+        connection.prepareStatement(UPDATE_JOURNALPOST_ID).use {
+            it.setString(1, vurdering.journalpostId?.value)
+            it.setObject(2, nowUTC())
+            it.setString(3, vurdering.uuid.toString())
+            val updated = it.executeUpdate()
+            if (updated != 1) {
+                throw SQLException("Expected a single row to be updated, got update count $updated")
+            }
+        }
+        connection.commit()
+    }
+
+    override fun getNotJournalforteVurderinger(): List<Pair<ManglendeMedvirkningVurdering, ByteArray>> =
+        database.connection.use { connection ->
+            connection.prepareStatement(GET_NOT_JOURNALFORT_VURDERING).use {
+                it.executeQuery().toList {
+                    Pair(
+                        toPVurdering(),
+                        getBytes("pdf"),
+                    )
+                }
+            }.map { (pVurdering, pdf) ->
+                val pVarsel = connection.getVarselForVurdering(pVurdering)
+                Pair(pVurdering.toManglendeMedvirkningVurdering(pVarsel), pdf)
+            }
         }
 
     private fun Connection.saveVurdering(vurdering: ManglendeMedvirkningVurdering): PVurdering {
@@ -93,6 +122,12 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
         return pVarsel
     }
 
+    private fun Connection.getVarselForVurdering(vurdering: PVurdering): PVarsel? =
+        prepareStatement(GET_VARSEL_FOR_VURDERING).use {
+            it.setInt(1, vurdering.id)
+            it.executeQuery().toList { toPVarsel() }.firstOrNull()
+        }
+
     companion object {
         private const val INSERT_INTO_VURDERING =
             """
@@ -137,16 +172,36 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             ) values (DEFAULT, ?, ?, ?, ?, ?, ?)
             RETURNING *
             """
+
+        private const val UPDATE_JOURNALPOST_ID =
+            """
+                UPDATE VURDERING
+                SET journalpost_id=?, updated_at=?
+                WHERE uuid=?
+            """
+
+        private const val GET_NOT_JOURNALFORT_VURDERING =
+            """
+                 SELECT v.*, vpdf.pdf
+                 FROM vurdering v
+                 INNER JOIN vurdering_pdf vpdf ON v.id = vpdf.vurdering_id
+                 WHERE v.journalpost_id IS NULL
+            """
+
+        private const val GET_VARSEL_FOR_VURDERING =
+            """
+                SELECT * FROM VARSEL WHERE vurdering_id = ?
+            """
     }
 }
 
-private fun ResultSet.toPVurdering(): PVurdering =
+internal fun ResultSet.toPVurdering(): PVurdering =
     PVurdering(
         id = getInt("id"),
         uuid = UUID.fromString(getString("uuid")),
         personident = Personident(getString("personident")),
         createdAt = getObject("created_at", OffsetDateTime::class.java),
-        updatedAt = getObject("created_at", OffsetDateTime::class.java),
+        updatedAt = getObject("updated_at", OffsetDateTime::class.java),
         veilederident = Veilederident(getString("veilederident")),
         type = VurderingType.valueOf(getString("type")),
         begrunnelse = getString("begrunnelse"),
@@ -164,7 +219,7 @@ private fun ResultSet.toPVarsel(): PVarsel =
         uuid = UUID.fromString(getString("uuid")),
         vurderingId = getInt("vurdering_id"),
         createdAt = getObject("created_at", OffsetDateTime::class.java),
-        updatedAt = getObject("created_at", OffsetDateTime::class.java),
+        updatedAt = getObject("updated_at", OffsetDateTime::class.java),
         svarfrist = getDate("svarfrist").toLocalDate(),
         publishedAt = getObject("published_at", OffsetDateTime::class.java),
     )

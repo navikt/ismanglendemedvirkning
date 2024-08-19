@@ -2,12 +2,8 @@ package no.nav.syfo.api.endpoints
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.server.testing.*
-import io.ktor.server.testing.TestApplicationEngine
 import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS
@@ -18,13 +14,11 @@ import no.nav.syfo.api.model.NewVurderingResponseDTO
 import no.nav.syfo.api.testApiModule
 import no.nav.syfo.api.testDeniedPersonAccess
 import no.nav.syfo.api.testMissingToken
-import no.nav.syfo.application.VurderingService
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateDocumentComponent
 import no.nav.syfo.infrastructure.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.infrastructure.bearerHeader
 import no.nav.syfo.infrastructure.database.dropData
-import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.util.configuredJacksonMapper
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
@@ -46,8 +40,6 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 externalMockEnvironment = externalMockEnvironment,
             )
 
-            val vurderingRepository = VurderingRepository(database)
-            val vurderingService = VurderingService(vurderingRepository = vurderingRepository)
             val validToken = generateJWT(
                 audience = externalMockEnvironment.environment.azure.appClientId,
                 issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,

@@ -8,11 +8,15 @@ import io.ktor.server.netty.*
 import no.nav.syfo.api.apiModule
 import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
+import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
+import no.nav.syfo.infrastructure.clients.pdl.PdlClient
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.infrastructure.clients.wellknown.getWellKnown
+import no.nav.syfo.infrastructure.cronjob.launchCronjobs
 import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
+import no.nav.syfo.infrastructure.journalforing.JournalforingService
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -29,9 +33,21 @@ fun main() {
     val azureAdClient = AzureAdClient(
         azureEnvironment = environment.azure
     )
+    val pdlClient = PdlClient(
+        azureAdClient = azureAdClient,
+        pdlEnvironment = environment.clients.pdl,
+    )
+    val dokarkivClient = DokarkivClient(
+        azureAdClient = azureAdClient,
+        dokarkivEnvironment = environment.clients.dokarkiv,
+    )
     val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(
         azureAdClient = azureAdClient,
         clientEnvironment = environment.clients.istilgangskontroll,
+    )
+    val journalforingService = JournalforingService(
+        dokarkivClient = dokarkivClient,
+        pdlClient = pdlClient,
     )
 
     val applicationEngineEnvironment =
@@ -55,7 +71,10 @@ fun main() {
                     wellKnownInternalAzureAD = wellKnownInternalAzureAD,
                     database = applicationDatabase,
                     veilederTilgangskontrollClient = veilederTilgangskontrollClient,
-                    vurderingService = VurderingService(vurderingRepository = vurderingRepository)
+                    vurderingService = VurderingService(
+                        vurderingRepository = vurderingRepository,
+                        journalforingService = journalforingService,
+                    )
                 )
             }
         }
@@ -63,6 +82,11 @@ fun main() {
     applicationEngineEnvironment.monitor.subscribe(ApplicationStarted) {
         applicationState.ready = true
         logger.info("Application is ready, running Java VM ${Runtime.version()}")
+
+        launchCronjobs(
+            applicationState = applicationState,
+            environment = environment,
+        )
     }
 
     val server = embeddedServer(

@@ -122,7 +122,7 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
     }
 }
 
-enum class VurderingType(isActive: Boolean) {
+enum class VurderingType(val isActive: Boolean) {
     FORHANDSVARSEL(true),
     OPPFYLT(false),
     STANS(false),

@@ -1,9 +1,6 @@
 package no.nav.syfo.application
 
-import io.mockk.coEvery
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verifyOrder
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT
@@ -109,15 +106,17 @@ class VurderingServiceSpek : Spek({
                     mockVurderingProducer.send(capture(producerRecordSlot))
                 }
 
-                val avslagVurderingRecord = producerRecordSlot.captured.value()
+                val vurderingRecord = producerRecordSlot.captured.value()
 
-                avslagVurderingRecord.uuid shouldBeEqualTo savedVurdering.uuid
-                avslagVurderingRecord.personident shouldBeEqualTo savedVurdering.personident
-                avslagVurderingRecord.veilederident shouldBeEqualTo savedVurdering.veilederident
-                avslagVurderingRecord.createdAt shouldBeEqualTo savedVurdering.createdAt
-                avslagVurderingRecord.begrunnelse shouldBeEqualTo savedVurdering.begrunnelse
+                vurderingRecord.uuid shouldBeEqualTo savedVurdering.uuid
+                vurderingRecord.personident shouldBeEqualTo savedVurdering.personident
+                vurderingRecord.veilederident shouldBeEqualTo savedVurdering.veilederident
+                vurderingRecord.createdAt shouldBeEqualTo savedVurdering.createdAt
+                vurderingRecord.begrunnelse shouldBeEqualTo savedVurdering.begrunnelse
+                vurderingRecord.vurderingType.value shouldBeEqualTo savedVurdering.vurderingType
+                vurderingRecord.vurderingType.isActive shouldBeEqualTo savedVurdering.vurderingType.isActive
                 when (savedVurdering) {
-                    is Forhandsvarsel -> avslagVurderingRecord.varsel?.svarfrist shouldBeEqualTo savedVurdering.varsel.svarfrist
+                    is Forhandsvarsel -> vurderingRecord.varsel?.svarfrist shouldBeEqualTo savedVurdering.varsel.svarfrist
                     else -> fail("Expected published record svarfrist to equal saved vurdering svarfrist")
                 }
             }

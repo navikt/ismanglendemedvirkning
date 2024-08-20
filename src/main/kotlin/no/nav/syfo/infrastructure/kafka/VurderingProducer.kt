@@ -46,7 +46,7 @@ data class VurderingRecord(
     val createdAt: OffsetDateTime,
     val begrunnelse: String,
     val varsel: Varsel?,
-    val vurderingType: VurderingType,
+    val vurderingType: VurderingTypeDTO,
 ) {
     companion object {
         fun fromVurdering(vurdering: ManglendeMedvirkningVurdering): VurderingRecord =
@@ -60,10 +60,18 @@ data class VurderingRecord(
                     is ManglendeMedvirkningVurdering.Forhandsvarsel -> vurdering.varsel
                     else -> null
                 },
-                vurderingType = vurdering.vurderingType,
+                vurderingType = VurderingTypeDTO(
+                    value = vurdering.vurderingType,
+                    isActive = vurdering.vurderingType.isActive
+                )
             )
     }
 }
+
+data class VurderingTypeDTO(
+    val value: VurderingType,
+    val isActive: Boolean,
+)
 
 class VurderingRecordSerializer : Serializer<VurderingRecord> {
     private val mapper = configuredJacksonMapper()

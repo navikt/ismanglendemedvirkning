@@ -1,9 +1,9 @@
 package no.nav.syfo.api.model
 
 import no.nav.syfo.domain.*
+import no.nav.syfo.util.toLocalDateTimeOslo
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.util.UUID
 
 data class VurderingResponseDTO private constructor(
@@ -19,7 +19,7 @@ data class VurderingResponseDTO private constructor(
         fun fromVurdering(vurdering: ManglendeMedvirkningVurdering) = VurderingResponseDTO(
             uuid = vurdering.uuid,
             personident = vurdering.personident.value,
-            createdAt = vurdering.createdAt.toLocalDateTime(),
+            createdAt = vurdering.createdAt.toLocalDateTimeOslo(),
             type = vurdering.vurderingType,
             begrunnelse = vurdering.begrunnelse,
             document = vurdering.document,
@@ -30,13 +30,13 @@ data class VurderingResponseDTO private constructor(
 
 data class VarselDTO private constructor(
     val uuid: UUID,
-    val createdAt: OffsetDateTime,
+    val createdAt: LocalDateTime,
     val svarfrist: LocalDate,
 ) {
     companion object {
         fun fromVarsel(varsel: Varsel) = VarselDTO(
             uuid = varsel.uuid,
-            createdAt = varsel.createdAt,
+            createdAt = varsel.createdAt.toLocalDateTimeOslo(),
             svarfrist = varsel.svarfrist,
         )
     }

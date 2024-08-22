@@ -165,9 +165,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                             addHeader(NAV_PERSONIDENT_HEADER, personIdent)
                         }
                     ) {
-                        response.status() shouldBeEqualTo HttpStatusCode.OK
-                        val responseDTOList = objectMapper.readValue<List<VurderingResponseDTO>>(response.content!!)
-                        responseDTOList shouldBeEqualTo emptyList()
+                        response.status() shouldBeEqualTo HttpStatusCode.NoContent
                     }
                 }
                 it("Successfully get vurdering (single vurdering)") {

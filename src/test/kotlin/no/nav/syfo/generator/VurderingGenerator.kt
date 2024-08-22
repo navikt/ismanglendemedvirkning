@@ -29,7 +29,7 @@ fun generateVurdering(
     )
     VurderingType.OPPFYLT -> ManglendeMedvirkningVurdering.Oppfylt(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,
@@ -38,7 +38,7 @@ fun generateVurdering(
     )
     VurderingType.IKKE_AKTUELL -> ManglendeMedvirkningVurdering.IkkeAktuell(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,
@@ -47,7 +47,7 @@ fun generateVurdering(
     )
     VurderingType.STANS -> ManglendeMedvirkningVurdering.Stans(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,

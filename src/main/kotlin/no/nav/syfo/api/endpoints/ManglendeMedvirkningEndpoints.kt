@@ -19,8 +19,6 @@ import no.nav.syfo.util.getCallId
 import no.nav.syfo.util.getNAVIdent
 import no.nav.syfo.util.getPersonident
 
-private const val API_ACTION = "access manglende medvirkning for person"
-
 fun Route.registerManglendeMedvirkningEndpoints(
     veilederTilgangskontrollClient: VeilederTilgangskontrollClient,
     vurderingService: VurderingService,
@@ -28,7 +26,7 @@ fun Route.registerManglendeMedvirkningEndpoints(
     route("/api/internad/v1/manglende-medvirkning") {
         get("/vurderinger") {
             val personident = call.getPersonident()
-                ?: throw IllegalArgumentException("Failed to $API_ACTION: No $NAV_PERSONIDENT_HEADER supplied in request header")
+                ?: throw IllegalArgumentException("Failed to access manglende medvirkning for person: No $NAV_PERSONIDENT_HEADER supplied in request header")
 
             validateVeilederAccess(
                 action = "GET /vurderinger",
@@ -38,8 +36,12 @@ fun Route.registerManglendeMedvirkningEndpoints(
                 val vurderinger = vurderingService.getVurderinger(
                     personident = personident,
                 )
-                val responseDTO = vurderinger.map { VurderingResponseDTO.createFromVurdering(it) }
-                call.respond(HttpStatusCode.OK, responseDTO)
+                val responseDTO = vurderinger.map { VurderingResponseDTO.fromVurdering(it) }
+                if (responseDTO.isEmpty()) {
+                    call.respond(HttpStatusCode.NoContent)
+                } else {
+                    call.respond(HttpStatusCode.OK, responseDTO)
+                }
             }
         }
 

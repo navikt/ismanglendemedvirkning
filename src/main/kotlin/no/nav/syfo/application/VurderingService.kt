@@ -38,6 +38,11 @@ class VurderingService(
         return savedVurdering
     }
 
+    fun getVurderinger(
+        personident: Personident,
+    ): List<ManglendeMedvirkningVurdering> =
+        vurderingRepository.getVurderinger(personident)
+
     suspend fun journalforVurderinger(): List<Result<ManglendeMedvirkningVurdering>> {
         val notJournalforteVurderinger = vurderingRepository.getNotJournalforteVurderinger()
 

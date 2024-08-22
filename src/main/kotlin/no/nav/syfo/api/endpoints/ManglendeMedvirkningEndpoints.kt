@@ -10,11 +10,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.syfo.api.model.NewVurderingRequestDTO
 import no.nav.syfo.api.model.NewVurderingResponseDTO
+import no.nav.syfo.api.model.VurderingResponseDTO
 import no.nav.syfo.application.VurderingService
+import no.nav.syfo.infrastructure.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.infrastructure.clients.veiledertilgang.validateVeilederAccess
 import no.nav.syfo.util.getCallId
 import no.nav.syfo.util.getNAVIdent
+import no.nav.syfo.util.getPersonident
 
 fun Route.registerManglendeMedvirkningEndpoints(
     veilederTilgangskontrollClient: VeilederTilgangskontrollClient,
@@ -22,8 +25,24 @@ fun Route.registerManglendeMedvirkningEndpoints(
 ) {
     route("/api/internad/v1/manglende-medvirkning") {
         get("/vurderinger") {
-            // TODO: Implement
-            call.respond(HttpStatusCode.NotImplemented)
+            val personident = call.getPersonident()
+                ?: throw IllegalArgumentException("Failed to access manglende medvirkning for person: No $NAV_PERSONIDENT_HEADER supplied in request header")
+
+            validateVeilederAccess(
+                action = "GET /vurderinger",
+                personident = personident,
+                veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+            ) {
+                val vurderinger = vurderingService.getVurderinger(
+                    personident = personident,
+                )
+                val responseDTO = vurderinger.map { VurderingResponseDTO.fromVurdering(it) }
+                if (responseDTO.isEmpty()) {
+                    call.respond(HttpStatusCode.NoContent)
+                } else {
+                    call.respond(HttpStatusCode.OK, responseDTO)
+                }
+            }
         }
 
         post("/vurderinger") {

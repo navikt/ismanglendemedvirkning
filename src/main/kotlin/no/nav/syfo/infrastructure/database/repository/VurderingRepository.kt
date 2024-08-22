@@ -35,10 +35,23 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
                 is ManglendeMedvirkningVurdering.Forhandsvarsel -> connection.saveVarsel(pVurdering.id, vurdering.varsel)
                 else -> null
             }
-            val pVurderingPdf = connection.saveVurderingPdf(pVurdering.id, pVurdering.createdAt, vurderingPdf)
+            connection.saveVurderingPdf(pVurdering.id, pVurdering.createdAt, vurderingPdf)
             connection.commit()
 
             pVurdering.toManglendeMedvirkningVurdering(pVarsel)
+        }
+
+    override fun getVurderinger(personident: Personident) =
+        database.connection.use { connection ->
+            connection.prepareStatement(GET_VURDERING).use {
+                it.setString(1, personident.value)
+                it.executeQuery().toList {
+                    toPVurdering()
+                }
+            }.map { pVurdering ->
+                val pVarsel = connection.getVarselForVurdering(pVurdering)
+                pVurdering.toManglendeMedvirkningVurdering(pVarsel)
+            }
         }
 
     override fun updatePublishedAt(vurderingUUID: UUID) =
@@ -185,6 +198,14 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
                 published_at
             ) values (DEFAULT, ?, ?, ?, ?, ?, ?)
             RETURNING *
+            """
+
+        private const val GET_VURDERING =
+            """
+                 SELECT v.*
+                 FROM vurdering v
+                 WHERE v.personident = ? 
+                 ORDER BY v.created_at DESC
             """
 
         private const val UPDATE_PUBLISHED_AT =

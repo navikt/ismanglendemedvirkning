@@ -8,3 +8,5 @@ val osloTimeZone: ZoneId = ZoneId.of("Europe/Oslo")
 fun nowUTC(): OffsetDateTime = OffsetDateTime.now(defaultZoneOffset)
 
 fun LocalDateTime.toOffsetDateTimeUTC(): OffsetDateTime = this.atZone(osloTimeZone).withZoneSameInstant(defaultZoneOffset).toOffsetDateTime()
+
+fun OffsetDateTime.toLocalDateTimeOslo(): LocalDateTime = this.atZoneSameInstant(osloTimeZone).toLocalDateTime()

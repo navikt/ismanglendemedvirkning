@@ -1,6 +1,7 @@
 package no.nav.syfo.application
 
 import no.nav.syfo.domain.ManglendeMedvirkningVurdering
+import no.nav.syfo.domain.Personident
 import java.util.UUID
 
 interface IVurderingRepository {
@@ -14,4 +15,6 @@ interface IVurderingRepository {
     fun getNotJournalforteVurderinger(): List<Pair<ManglendeMedvirkningVurdering, ByteArray>>
 
     fun updatePublishedAt(vurderingUuid: UUID)
+
+    fun getVurderinger(personident: Personident): List<ManglendeMedvirkningVurdering>
 }

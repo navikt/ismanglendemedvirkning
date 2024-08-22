@@ -10,11 +10,12 @@ fun generateVurdering(
     personident: Personident = UserConstants.ARBEIDSTAKER_PERSONIDENT,
     begrunnelse: String = "En begrunnelse",
     document: List<DocumentComponent> = generateDocumentComponent(begrunnelse),
-    type: VurderingType
+    type: VurderingType,
+    createdAt: OffsetDateTime = OffsetDateTime.now(),
 ) = when (type) {
     VurderingType.FORHANDSVARSEL -> ManglendeMedvirkningVurdering.Forhandsvarsel(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,
@@ -28,7 +29,7 @@ fun generateVurdering(
     )
     VurderingType.OPPFYLT -> ManglendeMedvirkningVurdering.Oppfylt(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,
@@ -37,7 +38,7 @@ fun generateVurdering(
     )
     VurderingType.IKKE_AKTUELL -> ManglendeMedvirkningVurdering.IkkeAktuell(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,
@@ -46,7 +47,7 @@ fun generateVurdering(
     )
     VurderingType.STANS -> ManglendeMedvirkningVurdering.Stans(
         uuid = UUID.randomUUID(),
-        createdAt = OffsetDateTime.now(),
+        createdAt = createdAt,
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,

@@ -1,11 +1,18 @@
 package no.nav.syfo.application
 
 import no.nav.syfo.domain.*
+import no.nav.syfo.domain.DocumentComponent
+import no.nav.syfo.domain.ManglendeMedvirkningVurdering
+import no.nav.syfo.domain.Personident
+import no.nav.syfo.domain.Veilederident
+import no.nav.syfo.domain.VurderingType
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class VurderingService(
-    private val vurderingRepository: IVurderingRepository,
     private val journalforingService: IJournalforingService,
+    private val vurderingRepository: IVurderingRepository,
+    private val vurderingProducer: IVurderingProducer,
 ) {
 
     fun createNewVurdering(
@@ -29,12 +36,13 @@ class VurderingService(
         // TODO: Get vurdering pdf from ispdfgen
 
         val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(
-            manglendeMedvirkning = newVurdering,
+            vurdering = newVurdering,
             vurderingPdf = byteArrayOf(),
         )
 
-        // TODO: Publish new vurdering
-
+        vurderingProducer.publishVurdering(savedVurdering)
+            .map { vurderingRepository.updatePublishedAt(it.uuid) }
+            .onFailure { log.error("Failed to publish vurdering with uuid: ${savedVurdering.uuid}, and message: ${it.message}") }
         return savedVurdering
     }
 
@@ -61,5 +69,9 @@ class VurderingService(
                 journalfortVurdering
             }
         }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(VurderingService::class.java)
     }
 }

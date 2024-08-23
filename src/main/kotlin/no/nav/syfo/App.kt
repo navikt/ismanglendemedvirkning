@@ -17,6 +17,10 @@ import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.infrastructure.journalforing.JournalforingService
+import no.nav.syfo.infrastructure.kafka.VurderingProducer
+import no.nav.syfo.infrastructure.kafka.VurderingRecordSerializer
+import no.nav.syfo.infrastructure.kafka.kafkaAivenProducerConfig
+import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -45,6 +49,9 @@ fun main() {
         azureAdClient = azureAdClient,
         clientEnvironment = environment.clients.istilgangskontroll,
     )
+    val vurderingProducer = VurderingProducer(
+        producer = KafkaProducer(kafkaAivenProducerConfig<VurderingRecordSerializer>(kafkaEnvironment = environment.kafka))
+    )
     val journalforingService = JournalforingService(
         dokarkivClient = dokarkivClient,
         pdlClient = pdlClient,
@@ -61,6 +68,7 @@ fun main() {
                 databaseModule(
                     databaseEnvironment = environment.database,
                 )
+
                 val vurderingRepository = VurderingRepository(
                     database = applicationDatabase,
                 )
@@ -72,8 +80,9 @@ fun main() {
                     database = applicationDatabase,
                     veilederTilgangskontrollClient = veilederTilgangskontrollClient,
                     vurderingService = VurderingService(
-                        vurderingRepository = vurderingRepository,
                         journalforingService = journalforingService,
+                        vurderingRepository = vurderingRepository,
+                        vurderingProducer = vurderingProducer,
                     )
                 )
             }

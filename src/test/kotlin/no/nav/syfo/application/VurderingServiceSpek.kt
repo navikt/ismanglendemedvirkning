@@ -1,24 +1,36 @@
-package no.nav.syfo.application.service
+package no.nav.syfo.application
 
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.ExternalMockEnvironment
+import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT_PDL_FAILS
-import no.nav.syfo.UserConstants.PDF_STANS
 import no.nav.syfo.UserConstants.PDF_FORHANDSVARSEL
+import no.nav.syfo.UserConstants.PDF_STANS
 import no.nav.syfo.UserConstants.PDF_VURDERING
-import no.nav.syfo.application.*
+import no.nav.syfo.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.domain.JournalpostId
+import no.nav.syfo.domain.ManglendeMedvirkningVurdering.Forhandsvarsel
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateVurdering
 import no.nav.syfo.infrastructure.database.dropData
 import no.nav.syfo.infrastructure.database.getVurdering
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.infrastructure.journalforing.JournalforingService
+import no.nav.syfo.infrastructure.kafka.VurderingProducer
+import no.nav.syfo.infrastructure.kafka.VurderingRecord
 import no.nav.syfo.infrastructure.mock.mockedJournalpostId
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeGreaterThan
+import org.amshove.kluent.shouldBeInstanceOf
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+import org.junit.Assert.fail
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.util.concurrent.Future
 
 class VurderingServiceSpek : Spek({
     describe(VurderingService::class.java.simpleName) {
@@ -32,9 +44,15 @@ class VurderingServiceSpek : Spek({
             pdlClient = externalMockEnvironment.pdlClient,
         )
 
+        val mockVurderingProducer = mockk<KafkaProducer<String, VurderingRecord>>(relaxed = true)
+        val vurderingProducer = VurderingProducer(
+            producer = mockVurderingProducer,
+        )
+
         val vurderingService = VurderingService(
-            vurderingRepository = vurderingRepository,
             journalforingService = journalforingService,
+            vurderingRepository = vurderingRepository,
+            vurderingProducer = vurderingProducer,
         )
 
         afterEachTest {
@@ -45,6 +63,64 @@ class VurderingServiceSpek : Spek({
         val vurderingOppfylt = generateVurdering(type = VurderingType.OPPFYLT)
         val vurderingAvslag = generateVurdering(type = VurderingType.STANS)
         val vurderingIkkeAktuell = generateVurdering(type = VurderingType.IKKE_AKTUELL)
+
+        describe("Create new vurdering") {
+            it("Lagrer vurdering") {
+                val savedVurdering = vurderingService.createNewVurdering(
+                    personident = ARBEIDSTAKER_PERSONIDENT,
+                    veilederident = VEILEDER_IDENT,
+                    vurderingType = VurderingType.FORHANDSVARSEL,
+                    begrunnelse = "Begrunnelse",
+                    document = emptyList(),
+                    varselSvarfrist = LocalDate.now().plusDays(14),
+                    callId = "callId",
+                )
+
+                savedVurdering.personident shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT
+                savedVurdering.veilederident shouldBeEqualTo VEILEDER_IDENT
+                savedVurdering.vurderingType shouldBeEqualTo VurderingType.FORHANDSVARSEL
+                savedVurdering.begrunnelse shouldBeEqualTo "Begrunnelse"
+                savedVurdering.document shouldBeEqualTo emptyList()
+                savedVurdering shouldBeInstanceOf Forhandsvarsel::class
+                when (savedVurdering) {
+                    is Forhandsvarsel -> savedVurdering.varsel.svarfrist shouldBeEqualTo LocalDate.now().plusDays(14)
+                    else -> fail("Expected savedVurdering to be an instance of Forhandsvarsel")
+                }
+            }
+
+            it("Publiserer lagret vurdering på kafka") {
+                coEvery { mockVurderingProducer.send(any()) } returns mockk<Future<RecordMetadata>>(relaxed = true)
+
+                val savedVurdering = vurderingService.createNewVurdering(
+                    personident = ARBEIDSTAKER_PERSONIDENT,
+                    veilederident = VEILEDER_IDENT,
+                    vurderingType = VurderingType.FORHANDSVARSEL,
+                    begrunnelse = "Begrunnelse",
+                    document = emptyList(),
+                    varselSvarfrist = LocalDate.now().plusDays(14),
+                    callId = "callId",
+                )
+
+                val producerRecordSlot = slot<ProducerRecord<String, VurderingRecord>>()
+                verifyOrder {
+                    mockVurderingProducer.send(capture(producerRecordSlot))
+                }
+
+                val vurderingRecord = producerRecordSlot.captured.value()
+
+                vurderingRecord.uuid shouldBeEqualTo savedVurdering.uuid
+                vurderingRecord.personident shouldBeEqualTo savedVurdering.personident
+                vurderingRecord.veilederident shouldBeEqualTo savedVurdering.veilederident
+                vurderingRecord.createdAt shouldBeEqualTo savedVurdering.createdAt
+                vurderingRecord.begrunnelse shouldBeEqualTo savedVurdering.begrunnelse
+                vurderingRecord.vurderingType.value shouldBeEqualTo savedVurdering.vurderingType
+                vurderingRecord.vurderingType.isActive shouldBeEqualTo savedVurdering.vurderingType.isActive
+                when (savedVurdering) {
+                    is Forhandsvarsel -> vurderingRecord.varsel?.svarfrist shouldBeEqualTo savedVurdering.varsel.svarfrist
+                    else -> fail("Expected published record svarfrist to equal saved vurdering svarfrist")
+                }
+            }
+        }
 
         describe("Journalføring") {
             it("journalfører FORHANDSVARSEL vurdering") {

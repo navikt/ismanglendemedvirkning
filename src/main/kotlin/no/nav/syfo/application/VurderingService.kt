@@ -74,12 +74,10 @@ class VurderingService(
 
     fun getLatestVurderingForPersoner(
         personidenter: List<Personident>,
-    ): Map<Personident, ManglendeMedvirkningVurdering> {
-        return emptyMap()
-    }
+    ): Map<Personident, ManglendeMedvirkningVurdering> =
+        vurderingRepository.getLatestVurderingForPersoner(personidenter)
 
     companion object {
         private val log = LoggerFactory.getLogger(VurderingService::class.java)
     }
-
 }

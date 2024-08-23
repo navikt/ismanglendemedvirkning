@@ -96,6 +96,33 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             }
         }
 
+    override fun getLatestVurderingForPersoner(
+        personidenter: List<Personident>,
+    ): Map<Personident, ManglendeMedvirkningVurdering> =
+        database.connection.use { connection ->
+            connection.prepareStatement(GET_VURDERINGER).use { preparedStatement ->
+                preparedStatement.setString(1, personidenter.joinToString(",") { it.value })
+                preparedStatement.executeQuery().toList {
+                    toPVurdering().toManglendeMedvirkningVurdering(
+                        if (getString("varsel_uuid") != null) {
+                            PVarsel(
+                                id = getInt("varsel_id"),
+                                uuid = UUID.fromString(getString("varsel_uuid")),
+                                createdAt = getObject("varsel_created_at", OffsetDateTime::class.java),
+                                updatedAt = getObject("varsel_updated_at", OffsetDateTime::class.java),
+                                vurderingId = getInt("id"),
+                                publishedAt = getObject("varsel_published_at", OffsetDateTime::class.java),
+                                svarfrist = getDate("varsel_svarfrist").toLocalDate(),
+                            )
+                        } else null
+                    )
+                }
+            }.associateBy {
+                // Den nyeste vurderingen blir valgt her siden lista er sortert med den nyeste til slutt
+                it.personident
+            }
+        }
+
     private fun Connection.saveVurdering(vurdering: ManglendeMedvirkningVurdering): PVurdering {
         val pVurdering = this.prepareStatement(INSERT_INTO_VURDERING).use {
             it.setString(1, vurdering.uuid.toString())
@@ -211,6 +238,20 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
         private const val UPDATE_PUBLISHED_AT =
             """
                 UPDATE VURDERING SET updated_at=?, published_at=? WHERE uuid=?
+            """
+
+        private const val GET_VURDERINGER =
+            """
+                SELECT vu.*,
+                    va.id as varsel_id,
+                    va.uuid as varsel_uuid,
+                    va.created_at as varsel_created_at,
+                    va.updated_at as varsel_updated_at,
+                    va.svarfrist as varsel_svarfrist,
+                    va.published_at as varsel_published_at
+                FROM VURDERING vu LEFT OUTER JOIN VARSEL va ON (vu.id = va.vurdering_id) 
+                WHERE vu.personident = ANY (string_to_array(?, ',')) 
+                ORDER BY vu.created_at ASC
             """
 
         private const val UPDATE_JOURNALPOST_ID =

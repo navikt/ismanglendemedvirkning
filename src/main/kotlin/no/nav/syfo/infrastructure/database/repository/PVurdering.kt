@@ -3,7 +3,6 @@ package no.nav.syfo.infrastructure.database.repository
 import no.nav.syfo.domain.JournalpostId
 import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
-import no.nav.syfo.domain.Varsel
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.domain.DocumentComponent
@@ -34,11 +33,7 @@ data class PVurdering(
                 begrunnelse = begrunnelse,
                 document = document,
                 journalpostId = journalpostId,
-                varsel = Varsel(
-                    uuid = pVarsel!!.uuid,
-                    createdAt = pVarsel.createdAt,
-                    svarfrist = pVarsel.svarfrist,
-                ),
+                varsel = pVarsel!!.toVarsel(),
             )
             VurderingType.OPPFYLT -> ManglendeMedvirkningVurdering.Oppfylt(
                 uuid = uuid,

@@ -8,13 +8,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.syfo.api.model.NewVurderingRequestDTO
-import no.nav.syfo.api.model.NewVurderingResponseDTO
-import no.nav.syfo.api.model.VurderingResponseDTO
+import no.nav.syfo.api.model.*
 import no.nav.syfo.application.VurderingService
+import no.nav.syfo.domain.Personident
 import no.nav.syfo.infrastructure.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.infrastructure.clients.veiledertilgang.validateVeilederAccess
+import no.nav.syfo.util.getBearerHeader
 import no.nav.syfo.util.getCallId
 import no.nav.syfo.util.getNAVIdent
 import no.nav.syfo.util.getPersonident
@@ -73,8 +73,34 @@ fun Route.registerManglendeMedvirkningEndpoints(
         }
 
         post("/get-vurderinger") {
-            // TODO: Implement
-            call.respond(HttpStatusCode.NotImplemented)
+            val token = call.getBearerHeader()
+                ?: throw IllegalArgumentException("Failed to get vurderinger for personer. No Authorization header supplied.")
+            val requestDTOList = call.receive<VurderingerRequestDTO>()
+
+            val personerVeilederHasAccessTo = veilederTilgangskontrollClient.veilederPersonerAccess(
+                personidenter = requestDTOList.personidenter.map { Personident(it) },
+                token = token,
+                callId = call.getCallId(),
+            )
+
+            val vurderinger = if (personerVeilederHasAccessTo.isNullOrEmpty()) {
+                emptyMap()
+            } else {
+                vurderingService.getLatestVurderingForPersoner(
+                    personidenter = personerVeilederHasAccessTo,
+                )
+            }
+
+            if (vurderinger.isEmpty()) {
+                call.respond(HttpStatusCode.NoContent)
+            } else {
+                val responseDTO = VurderingerResponseDTO(
+                    vurderinger = vurderinger.map {
+                        it.key.value to VurderingResponseDTO.fromVurdering(it.value)
+                    }.associate { it },
+                )
+                call.respond(responseDTO)
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import no.nav.syfo.api.generateJWT
 import no.nav.syfo.api.model.NewVurderingRequestDTO
 import no.nav.syfo.api.model.NewVurderingResponseDTO
 import no.nav.syfo.api.model.VurderingResponseDTO
+import no.nav.syfo.api.model.VurderingerRequestDTO
 import no.nav.syfo.api.testApiModule
 import no.nav.syfo.api.testDeniedPersonAccess
 import no.nav.syfo.api.testMissingToken
@@ -247,14 +248,17 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
             }
 
             describe("POST /get-vurderinger") {
+                val personidenter = listOf(ARBEIDSTAKER_PERSONIDENT)
+                val requestDTO = VurderingerRequestDTO(personidenter.map { it.value })
                 it("Successfully retrieves a group of vurderinger") {
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/get-vurderinger") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                             addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(requestDTO))
                         }
                     ) {
-                        response.status() shouldBeEqualTo HttpStatusCode.NotImplemented
+                        response.status() shouldBeEqualTo HttpStatusCode.NoContent
                     }
                 }
             }

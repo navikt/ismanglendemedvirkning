@@ -282,6 +282,38 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         vurderingResponseDTO!!.type shouldBeEqualTo VurderingType.FORHANDSVARSEL
                     }
                 }
+                it("Retrieves latest vurderinger if more than one") {
+                    val forhandsvarsel = generateVurdering(
+                        personident = Personident(personIdent),
+                        type = VurderingType.FORHANDSVARSEL,
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = forhandsvarsel,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    val oppfylt = generateVurdering(
+                        personident = Personident(personIdent),
+                        type = VurderingType.OPPFYLT,
+                        createdAt = forhandsvarsel.createdAt.plusSeconds(1),
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = oppfylt,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/get-vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(requestDTO))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.OK
+                        val responseDTO = objectMapper.readValue<VurderingerResponseDTO>(response.content!!)
+                        val vurderingResponseDTO = responseDTO.vurderinger.get(personIdent)
+                        vurderingResponseDTO!!.personident shouldBeEqualTo personIdent
+                        vurderingResponseDTO!!.type shouldBeEqualTo VurderingType.OPPFYLT
+                    }
+                }
                 it("Only retrieves vurderinger for which the user has access") {
                     val forhandsvarsel = generateVurdering(
                         personident = Personident(personIdent),

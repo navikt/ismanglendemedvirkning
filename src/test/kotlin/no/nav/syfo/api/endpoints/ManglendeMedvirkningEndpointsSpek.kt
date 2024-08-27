@@ -11,9 +11,7 @@ import no.nav.syfo.UserConstants.PDF_FORHANDSVARSEL
 import no.nav.syfo.UserConstants.PDF_VURDERING
 import no.nav.syfo.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.api.generateJWT
-import no.nav.syfo.api.model.NewVurderingRequestDTO
-import no.nav.syfo.api.model.NewVurderingResponseDTO
-import no.nav.syfo.api.model.VurderingResponseDTO
+import no.nav.syfo.api.model.*
 import no.nav.syfo.api.testApiModule
 import no.nav.syfo.api.testDeniedPersonAccess
 import no.nav.syfo.api.testMissingToken
@@ -26,6 +24,7 @@ import no.nav.syfo.infrastructure.bearerHeader
 import no.nav.syfo.infrastructure.database.dropData
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.util.configuredJacksonMapper
+import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
@@ -247,14 +246,102 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
             }
 
             describe("POST /get-vurderinger") {
-                it("Successfully retrieves a group of vurderinger") {
+                val personidenter = listOf(personIdent)
+                val requestDTO = VurderingerRequestDTO(personidenter)
+                it("Successfully retrieves an empty group of vurderinger") {
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/get-vurderinger") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                             addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(requestDTO))
                         }
                     ) {
-                        response.status() shouldBeEqualTo HttpStatusCode.NotImplemented
+                        response.status() shouldBeEqualTo HttpStatusCode.NoContent
+                    }
+                }
+                it("Successfully retrieves a group of vurderinger") {
+                    val forhandsvarsel = generateVurdering(
+                        personident = Personident(personIdent),
+                        type = VurderingType.FORHANDSVARSEL,
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = forhandsvarsel,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/get-vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(requestDTO))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.OK
+                        val responseDTO = objectMapper.readValue<VurderingerResponseDTO>(response.content!!)
+                        val vurderingResponseDTO = responseDTO.vurderinger.get(personIdent)
+                        vurderingResponseDTO!!.personident shouldBeEqualTo personIdent
+                        vurderingResponseDTO!!.type shouldBeEqualTo VurderingType.FORHANDSVARSEL
+                    }
+                }
+                it("Retrieves latest vurderinger if more than one") {
+                    val forhandsvarsel = generateVurdering(
+                        personident = Personident(personIdent),
+                        type = VurderingType.FORHANDSVARSEL,
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = forhandsvarsel,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    val oppfylt = generateVurdering(
+                        personident = Personident(personIdent),
+                        type = VurderingType.OPPFYLT,
+                        createdAt = forhandsvarsel.createdAt.plusSeconds(1),
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = oppfylt,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/get-vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(requestDTO))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.OK
+                        val responseDTO = objectMapper.readValue<VurderingerResponseDTO>(response.content!!)
+                        val vurderingResponseDTO = responseDTO.vurderinger.get(personIdent)
+                        vurderingResponseDTO!!.personident shouldBeEqualTo personIdent
+                        vurderingResponseDTO!!.type shouldBeEqualTo VurderingType.OPPFYLT
+                    }
+                }
+                it("Only retrieves vurderinger for which the user has access") {
+                    val forhandsvarsel = generateVurdering(
+                        personident = Personident(personIdent),
+                        type = VurderingType.FORHANDSVARSEL,
+                    )
+                    val forhandsvarselNoAccess = generateVurdering(
+                        personident = Personident(personIdentNoAccess),
+                        type = VurderingType.FORHANDSVARSEL,
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = forhandsvarselNoAccess,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    vurderingRepository.saveManglendeMedvirkningVurdering(
+                        vurdering = forhandsvarsel,
+                        vurderingPdf = PDF_FORHANDSVARSEL,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/get-vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(VurderingerRequestDTO(listOf(personIdent, personIdentNoAccess))))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.OK
+                        val responseDTO = objectMapper.readValue<VurderingerResponseDTO>(response.content!!)
+                        responseDTO.vurderinger.keys.contains(personIdent) shouldBe true
+                        responseDTO.vurderinger.keys.contains(personIdentNoAccess) shouldBe false
                     }
                 }
             }

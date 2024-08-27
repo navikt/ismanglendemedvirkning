@@ -17,4 +17,6 @@ interface IVurderingRepository {
     fun updatePublishedAt(vurderingUuid: UUID)
 
     fun getVurderinger(personident: Personident): List<ManglendeMedvirkningVurdering>
+
+    fun getLatestVurderingForPersoner(personidenter: List<Personident>): Map<Personident, ManglendeMedvirkningVurdering>
 }

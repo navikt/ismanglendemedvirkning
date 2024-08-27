@@ -43,6 +43,7 @@ class VurderingService(
         vurderingProducer.publishVurdering(savedVurdering)
             .map { vurderingRepository.updatePublishedAt(it.uuid) }
             .onFailure { log.error("Failed to publish vurdering with uuid: ${savedVurdering.uuid}, and message: ${it.message}") }
+
         return savedVurdering
     }
 
@@ -70,6 +71,11 @@ class VurderingService(
             }
         }
     }
+
+    fun getLatestVurderingForPersoner(
+        personidenter: List<Personident>,
+    ): Map<Personident, ManglendeMedvirkningVurdering> =
+        vurderingRepository.getLatestVurderingForPersoner(personidenter)
 
     companion object {
         private val log = LoggerFactory.getLogger(VurderingService::class.java)

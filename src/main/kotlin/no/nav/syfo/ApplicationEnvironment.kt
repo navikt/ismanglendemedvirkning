@@ -2,6 +2,7 @@ package no.nav.syfo
 
 import no.nav.syfo.infrastructure.clients.ClientEnvironment
 import no.nav.syfo.infrastructure.clients.ClientsEnvironment
+import no.nav.syfo.infrastructure.clients.OpenClientEnvironment
 import no.nav.syfo.infrastructure.clients.azuread.AzureEnvironment
 import no.nav.syfo.infrastructure.database.DatabaseEnvironment
 import no.nav.syfo.infrastructure.kafka.KafkaEnvironment
@@ -38,6 +39,9 @@ data class Environment(
             dokarkiv = ClientEnvironment(
                 baseUrl = getEnvVar("DOKARKIV_URL"),
                 clientId = getEnvVar("DOKARKIV_CLIENT_ID")
+            ),
+            ispdfgen = OpenClientEnvironment(
+                baseUrl = "http://ispdfgen"
             ),
         ),
     val kafka: KafkaEnvironment = KafkaEnvironment(

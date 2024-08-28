@@ -13,9 +13,10 @@ class VurderingService(
     private val journalforingService: IJournalforingService,
     private val vurderingRepository: IVurderingRepository,
     private val vurderingProducer: IVurderingProducer,
+    private val vurderingPdfService: IVurderingPdfService,
 ) {
 
-    fun createNewVurdering(
+    suspend fun createNewVurdering(
         personident: Personident,
         veilederident: Veilederident,
         vurderingType: VurderingType,
@@ -33,11 +34,14 @@ class VurderingService(
             type = vurderingType,
         )
 
-        // TODO: Get vurdering pdf from ispdfgen
+        val pdf = vurderingPdfService.createVurderingPdf(
+            vurdering = newVurdering,
+            callId = callId,
+        )
 
         val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(
             vurdering = newVurdering,
-            vurderingPdf = byteArrayOf(),
+            vurderingPdf = pdf,
         )
 
         vurderingProducer.publishVurdering(savedVurdering)

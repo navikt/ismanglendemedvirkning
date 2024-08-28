@@ -37,7 +37,7 @@ class VurderingRepositorySpek : Spek({
                         journalpostId = null,
                     )
                     val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
-                    savedVurdering!!.personident shouldBeEqualTo vurdering.personident
+                    savedVurdering.personident shouldBeEqualTo vurdering.personident
                     savedVurdering.veilederident shouldBeEqualTo vurdering.veilederident
                     savedVurdering.begrunnelse shouldBeEqualTo vurdering.begrunnelse
                     savedVurdering.document shouldBeEqualTo vurdering.document

@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.mockk.mockk
 import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.application.VurderingService
+import no.nav.syfo.infrastructure.clients.pdfgen.VurderingPdfService
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.infrastructure.journalforing.JournalforingService
 import no.nav.syfo.infrastructure.kafka.VurderingProducer
@@ -21,6 +22,10 @@ fun Application.testApiModule(
     )
     val mockVurderingProducer = mockk<KafkaProducer<String, VurderingRecord>>(relaxed = true)
     val vurderingProducer = VurderingProducer(producer = mockVurderingProducer)
+    val vurderingPdfService = VurderingPdfService(
+        pdfGenClient = externalMockEnvironment.pdfgenClient,
+        pdlClient = externalMockEnvironment.pdlClient,
+    )
     val journalforingService = JournalforingService(
         dokarkivClient = externalMockEnvironment.dokarkivClient,
         pdlClient = externalMockEnvironment.pdlClient,
@@ -30,6 +35,7 @@ fun Application.testApiModule(
             journalforingService = journalforingService,
             vurderingRepository = externalMockEnvironment.vurderingRepository,
             vurderingProducer = vurderingProducer,
+            vurderingPdfService = vurderingPdfService,
         )
 
     this.apiModule(

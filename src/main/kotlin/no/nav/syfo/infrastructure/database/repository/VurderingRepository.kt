@@ -305,7 +305,7 @@ private fun ResultSet.toPVarsel(): PVarsel =
         publishedAt = getObject("published_at", OffsetDateTime::class.java),
     )
 
-private fun ResultSet.toPVurderingPdf(): PVurderingPdf =
+fun ResultSet.toPVurderingPdf(): PVurderingPdf =
     PVurderingPdf(
         id = getInt("id"),
         uuid = UUID.fromString(getString("uuid")),

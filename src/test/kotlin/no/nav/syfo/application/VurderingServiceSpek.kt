@@ -13,8 +13,10 @@ import no.nav.syfo.domain.JournalpostId
 import no.nav.syfo.domain.ManglendeMedvirkningVurdering.Forhandsvarsel
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateVurdering
+import no.nav.syfo.infrastructure.clients.pdfgen.VurderingPdfService
 import no.nav.syfo.infrastructure.database.dropData
 import no.nav.syfo.infrastructure.database.getVurdering
+import no.nav.syfo.infrastructure.database.getVurderingPdf
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.infrastructure.journalforing.JournalforingService
 import no.nav.syfo.infrastructure.kafka.VurderingProducer
@@ -23,6 +25,7 @@ import no.nav.syfo.infrastructure.mock.mockedJournalpostId
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeGreaterThan
 import org.amshove.kluent.shouldBeInstanceOf
+import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -48,11 +51,16 @@ class VurderingServiceSpek : Spek({
         val vurderingProducer = VurderingProducer(
             producer = mockVurderingProducer,
         )
+        val vurderingPdfService = VurderingPdfService(
+            externalMockEnvironment.pdfgenClient,
+            externalMockEnvironment.pdlClient,
+        )
 
         val vurderingService = VurderingService(
             journalforingService = journalforingService,
             vurderingRepository = vurderingRepository,
             vurderingProducer = vurderingProducer,
+            vurderingPdfService = vurderingPdfService,
         )
 
         afterEachTest {
@@ -61,20 +69,22 @@ class VurderingServiceSpek : Spek({
 
         val vurderingForhandsvarsel = generateVurdering(type = VurderingType.FORHANDSVARSEL)
         val vurderingOppfylt = generateVurdering(type = VurderingType.OPPFYLT)
-        val vurderingAvslag = generateVurdering(type = VurderingType.STANS)
+        val vurderingStans = generateVurdering(type = VurderingType.STANS)
         val vurderingIkkeAktuell = generateVurdering(type = VurderingType.IKKE_AKTUELL)
 
         describe("Create new vurdering") {
             it("Lagrer vurdering") {
-                val savedVurdering = vurderingService.createNewVurdering(
-                    personident = ARBEIDSTAKER_PERSONIDENT,
-                    veilederident = VEILEDER_IDENT,
-                    vurderingType = VurderingType.FORHANDSVARSEL,
-                    begrunnelse = "Begrunnelse",
-                    document = emptyList(),
-                    varselSvarfrist = LocalDate.now().plusDays(14),
-                    callId = "callId",
-                )
+                val savedVurdering = runBlocking {
+                    vurderingService.createNewVurdering(
+                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        veilederident = VEILEDER_IDENT,
+                        vurderingType = VurderingType.FORHANDSVARSEL,
+                        begrunnelse = "Begrunnelse",
+                        document = emptyList(),
+                        varselSvarfrist = LocalDate.now().plusDays(14),
+                        callId = "callId",
+                    )
+                }
 
                 savedVurdering.personident shouldBeEqualTo ARBEIDSTAKER_PERSONIDENT
                 savedVurdering.veilederident shouldBeEqualTo VEILEDER_IDENT
@@ -86,20 +96,25 @@ class VurderingServiceSpek : Spek({
                     is Forhandsvarsel -> savedVurdering.varsel.svarfrist shouldBeEqualTo LocalDate.now().plusDays(14)
                     else -> fail("Expected savedVurdering to be an instance of Forhandsvarsel")
                 }
+
+                val pVurderingPdf = database.getVurderingPdf(savedVurdering.uuid)
+                pVurderingPdf.shouldNotBeNull()
             }
 
             it("Publiserer lagret vurdering på kafka") {
                 coEvery { mockVurderingProducer.send(any()) } returns mockk<Future<RecordMetadata>>(relaxed = true)
 
-                val savedVurdering = vurderingService.createNewVurdering(
-                    personident = ARBEIDSTAKER_PERSONIDENT,
-                    veilederident = VEILEDER_IDENT,
-                    vurderingType = VurderingType.FORHANDSVARSEL,
-                    begrunnelse = "Begrunnelse",
-                    document = emptyList(),
-                    varselSvarfrist = LocalDate.now().plusDays(14),
-                    callId = "callId",
-                )
+                val savedVurdering = runBlocking {
+                    vurderingService.createNewVurdering(
+                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        veilederident = VEILEDER_IDENT,
+                        vurderingType = VurderingType.FORHANDSVARSEL,
+                        begrunnelse = "Begrunnelse",
+                        document = emptyList(),
+                        varselSvarfrist = LocalDate.now().plusDays(14),
+                        callId = "callId",
+                    )
+                }
 
                 val producerRecordSlot = slot<ProducerRecord<String, VurderingRecord>>()
                 verifyOrder {
@@ -169,9 +184,9 @@ class VurderingServiceSpek : Spek({
                 pVurdering.journalpostId?.value shouldBeEqualTo mockedJournalpostId.toString()
             }
 
-            it("journalfører AVSLAG vurdering") {
+            it("journalfører STANS vurdering") {
                 vurderingRepository.saveManglendeMedvirkningVurdering(
-                    vurdering = vurderingAvslag,
+                    vurdering = vurderingStans,
                     vurderingPdf = PDF_STANS,
                 )
 
@@ -183,7 +198,7 @@ class VurderingServiceSpek : Spek({
                 failed.size shouldBeEqualTo 0
                 success.size shouldBeEqualTo 1
 
-                val pVurdering = database.getVurdering(vurderingAvslag.uuid)
+                val pVurdering = database.getVurdering(vurderingStans.uuid)
                 pVurdering!!.type shouldBeEqualTo VurderingType.STANS
                 pVurdering.journalpostId?.value shouldBeEqualTo mockedJournalpostId.toString()
             }

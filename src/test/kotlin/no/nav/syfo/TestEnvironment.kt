@@ -2,6 +2,7 @@ package no.nav.syfo
 
 import no.nav.syfo.infrastructure.clients.ClientEnvironment
 import no.nav.syfo.infrastructure.clients.ClientsEnvironment
+import no.nav.syfo.infrastructure.clients.OpenClientEnvironment
 import no.nav.syfo.infrastructure.clients.azuread.AzureEnvironment
 import no.nav.syfo.infrastructure.database.DatabaseEnvironment
 import no.nav.syfo.infrastructure.kafka.KafkaEnvironment
@@ -40,7 +41,10 @@ fun testEnvironment() = Environment(
         dokarkiv = ClientEnvironment(
             baseUrl = "dokarkivUrl",
             clientId = "dokarkivClientId",
-        )
+        ),
+        ispdfgen = OpenClientEnvironment(
+            baseUrl = "ispdfgenUrl",
+        ),
     ),
     electorPath = "electorPath",
 )

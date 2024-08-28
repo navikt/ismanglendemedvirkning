@@ -8,6 +8,7 @@ import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS
 import no.nav.syfo.UserConstants.PDF_FORHANDSVARSEL
+import no.nav.syfo.UserConstants.PDF_STANS
 import no.nav.syfo.UserConstants.PDF_VURDERING
 import no.nav.syfo.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.api.generateJWT
@@ -22,6 +23,7 @@ import no.nav.syfo.generator.generateVurdering
 import no.nav.syfo.infrastructure.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.infrastructure.bearerHeader
 import no.nav.syfo.infrastructure.database.dropData
+import no.nav.syfo.infrastructure.database.getVurderingPdf
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.util.configuredJacksonMapper
 import org.amshove.kluent.shouldBe
@@ -85,11 +87,16 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         responseDTO.begrunnelse shouldBeEqualTo forhandsvarselRequestDTO.begrunnelse
                         responseDTO.document shouldBeEqualTo forhandsvarselRequestDTO.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo forhandsvarselRequestDTO.varselSvarfrist
+
+                        val pVurderingPdf = database.getVurderingPdf(responseDTO.uuid)
+                        pVurderingPdf?.pdf?.size shouldBeEqualTo PDF_FORHANDSVARSEL.size
+                        pVurderingPdf?.pdf?.get(0) shouldBeEqualTo PDF_FORHANDSVARSEL[0]
+                        pVurderingPdf?.pdf?.get(1) shouldBeEqualTo PDF_FORHANDSVARSEL[1]
                     }
                 }
 
-                it("Successfully creates an STANS vurdering") {
-                    val avslagVurdering = NewVurderingRequestDTO(
+                it("Successfully creates an STANS vurdering with pdf") {
+                    val stansVurdering = NewVurderingRequestDTO(
                         personident = ARBEIDSTAKER_PERSONIDENT,
                         vurderingType = VurderingType.STANS,
                         begrunnelse = "Fin begrunnelse",
@@ -103,16 +110,87 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                             addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
-                            setBody(objectMapper.writeValueAsString(avslagVurdering))
+                            setBody(objectMapper.writeValueAsString(stansVurdering))
                         }
                     ) {
                         response.status() shouldBeEqualTo HttpStatusCode.Created
                         val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
-                        responseDTO.personident shouldBeEqualTo avslagVurdering.personident
-                        responseDTO.vurderingType shouldBeEqualTo avslagVurdering.vurderingType
-                        responseDTO.begrunnelse shouldBeEqualTo avslagVurdering.begrunnelse
-                        responseDTO.document shouldBeEqualTo avslagVurdering.document
+                        responseDTO.personident shouldBeEqualTo stansVurdering.personident
+                        responseDTO.vurderingType shouldBeEqualTo stansVurdering.vurderingType
+                        responseDTO.begrunnelse shouldBeEqualTo stansVurdering.begrunnelse
+                        responseDTO.document shouldBeEqualTo stansVurdering.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo null
+
+                        val pVurderingPdf = database.getVurderingPdf(responseDTO.uuid)
+                        pVurderingPdf?.pdf?.size shouldBeEqualTo PDF_STANS.size
+                        pVurderingPdf?.pdf?.get(0) shouldBeEqualTo PDF_STANS[0]
+                        pVurderingPdf?.pdf?.get(1) shouldBeEqualTo PDF_STANS[1]
+                    }
+                }
+
+                it("Successfully creates an OPPFYLT vurdering with pdf") {
+                    val oppfyltVurdering = NewVurderingRequestDTO(
+                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        vurderingType = VurderingType.OPPFYLT,
+                        begrunnelse = "Fin begrunnelse",
+                        document = generateDocumentComponent(
+                            fritekst = begrunnelse,
+                            header = "Oppfylt"
+                        ),
+                        varselSvarfrist = null,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(oppfyltVurdering))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.Created
+                        val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
+                        responseDTO.personident shouldBeEqualTo oppfyltVurdering.personident
+                        responseDTO.vurderingType shouldBeEqualTo oppfyltVurdering.vurderingType
+                        responseDTO.begrunnelse shouldBeEqualTo oppfyltVurdering.begrunnelse
+                        responseDTO.document shouldBeEqualTo oppfyltVurdering.document
+                        responseDTO.varsel?.svarfrist shouldBeEqualTo null
+
+                        val pVurderingPdf = database.getVurderingPdf(responseDTO.uuid)
+                        pVurderingPdf?.pdf?.size shouldBeEqualTo PDF_VURDERING.size
+                        pVurderingPdf?.pdf?.get(0) shouldBeEqualTo PDF_VURDERING[0]
+                        pVurderingPdf?.pdf?.get(1) shouldBeEqualTo PDF_VURDERING[1]
+                    }
+                }
+
+                it("Successfully creates an IKKE AKTUELL vurdering with pdf") {
+                    val ikkeAktuellVurdering = NewVurderingRequestDTO(
+                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        vurderingType = VurderingType.IKKE_AKTUELL,
+                        begrunnelse = "Fin begrunnelse",
+                        document = generateDocumentComponent(
+                            fritekst = begrunnelse,
+                            header = "Oppfylt"
+                        ),
+                        varselSvarfrist = null,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(ikkeAktuellVurdering))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.Created
+                        val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
+                        responseDTO.personident shouldBeEqualTo ikkeAktuellVurdering.personident
+                        responseDTO.vurderingType shouldBeEqualTo ikkeAktuellVurdering.vurderingType
+                        responseDTO.begrunnelse shouldBeEqualTo ikkeAktuellVurdering.begrunnelse
+                        responseDTO.document shouldBeEqualTo ikkeAktuellVurdering.document
+                        responseDTO.varsel?.svarfrist shouldBeEqualTo null
+
+                        val pVurderingPdf = database.getVurderingPdf(responseDTO.uuid)
+                        pVurderingPdf?.pdf?.size shouldBeEqualTo PDF_VURDERING.size
+                        pVurderingPdf?.pdf?.get(0) shouldBeEqualTo PDF_VURDERING[0]
+                        pVurderingPdf?.pdf?.get(1) shouldBeEqualTo PDF_VURDERING[1]
                     }
                 }
 

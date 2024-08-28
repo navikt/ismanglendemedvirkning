@@ -9,6 +9,8 @@ import no.nav.syfo.api.apiModule
 import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
+import no.nav.syfo.infrastructure.clients.pdfgen.PdfGenClient
+import no.nav.syfo.infrastructure.clients.pdfgen.VurderingPdfService
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
 import no.nav.syfo.infrastructure.clients.wellknown.getWellKnown
@@ -49,11 +51,20 @@ fun main() {
         azureAdClient = azureAdClient,
         clientEnvironment = environment.clients.istilgangskontroll,
     )
+    val pdfGenClient = PdfGenClient(
+        pdfGenBaseUrl = environment.clients.ispdfgen.baseUrl,
+    )
+
     val vurderingProducer = VurderingProducer(
         producer = KafkaProducer(kafkaAivenProducerConfig<VurderingRecordSerializer>(kafkaEnvironment = environment.kafka))
     )
     val journalforingService = JournalforingService(
         dokarkivClient = dokarkivClient,
+        pdlClient = pdlClient,
+    )
+
+    val vurderingPdfService = VurderingPdfService(
+        pdfGenClient = pdfGenClient,
         pdlClient = pdlClient,
     )
 
@@ -83,6 +94,7 @@ fun main() {
                         journalforingService = journalforingService,
                         vurderingRepository = vurderingRepository,
                         vurderingProducer = vurderingProducer,
+                        vurderingPdfService = vurderingPdfService,
                     )
                 )
             }

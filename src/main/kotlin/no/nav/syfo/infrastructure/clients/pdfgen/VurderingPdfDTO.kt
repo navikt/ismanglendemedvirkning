@@ -13,19 +13,18 @@ data class VurderingPdfDTO private constructor(
     val datoSendt: String,
     val documentComponents: List<DocumentComponent>,
 ) {
+    constructor(
+        mottakerNavn: String,
+        mottakerPersonident: Personident,
+        documentComponents: List<DocumentComponent>,
+    ) : this(
+        mottakerNavn = mottakerNavn,
+        mottakerFodselsnummer = mottakerPersonident.value,
+        datoSendt = LocalDate.now().format(formatter),
+        documentComponents = documentComponents.sanitizeForPdfGen()
+    )
+
     companion object {
         private val formatter = DateTimeFormatter.ofPattern("dd. MMMM yyyy", Locale("no", "NO"))
-
-        fun create(
-            mottakerNavn: String,
-            mottakerPersonident: Personident,
-            documentComponents: List<DocumentComponent>,
-        ): VurderingPdfDTO =
-            VurderingPdfDTO(
-                mottakerNavn = mottakerNavn,
-                mottakerFodselsnummer = mottakerPersonident.value,
-                datoSendt = LocalDate.now().format(formatter),
-                documentComponents = documentComponents.sanitizeForPdfGen()
-            )
     }
 }

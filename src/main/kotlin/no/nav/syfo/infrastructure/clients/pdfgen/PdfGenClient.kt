@@ -41,11 +41,11 @@ class PdfGenClient(
 
     suspend fun createStansPdf(
         callId: String,
-        vurderingPdfDTO: VurderingPdfDTO,
+        stansPdfDTO: VurderingPdfDTO,
     ): ByteArray =
         getPdf(
             callId = callId,
-            payload = vurderingPdfDTO,
+            payload = stansPdfDTO,
             pdfUrl = "$pdfGenBaseUrl$API_BASE_PATH$STANS_PATH"
         ) ?: throw RuntimeException("Failed to request pdf for stans, callId: $callId")
 
@@ -63,9 +63,7 @@ class PdfGenClient(
             }
             Metrics.COUNT_CALL_PDFGEN_SUCCESS.increment()
             response.body()
-        } catch (e: ClientRequestException) {
-            handleUnexpectedResponseException(pdfUrl, e.response, callId)
-        } catch (e: ServerResponseException) {
+        } catch (e: ResponseException) {
             handleUnexpectedResponseException(pdfUrl, e.response, callId)
         }
 

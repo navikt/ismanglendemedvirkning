@@ -47,10 +47,11 @@ fun Route.registerManglendeMedvirkningEndpoints(
 
         post("/vurderinger") {
             val requestDTO = call.receive<NewVurderingRequestDTO>()
+            val personident = Personident(requestDTO.personident)
 
             validateVeilederAccess(
                 action = "POST /vurderinger",
-                personident = requestDTO.personident,
+                personident = personident,
                 veilederTilgangskontrollClient = veilederTilgangskontrollClient,
             ) {
                 val callId = call.getCallId()
@@ -59,7 +60,7 @@ fun Route.registerManglendeMedvirkningEndpoints(
                 }
 
                 val newVurdering = vurderingService.createNewVurdering(
-                    personident = requestDTO.personident,
+                    personident = personident,
                     veilederident = call.getNAVIdent(),
                     vurderingType = requestDTO.vurderingType,
                     begrunnelse = requestDTO.begrunnelse,
@@ -68,7 +69,7 @@ fun Route.registerManglendeMedvirkningEndpoints(
                     callId = callId,
                 )
 
-                call.respond(HttpStatusCode.Created, NewVurderingResponseDTO.fromVurdering(newVurdering))
+                call.respond(HttpStatusCode.Created, VurderingResponseDTO.fromVurdering(newVurdering))
             }
         }
 

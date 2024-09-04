@@ -1,12 +1,11 @@
 package no.nav.syfo.api.model
 
-import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.domain.DocumentComponent
 import java.time.LocalDate
 
 data class NewVurderingRequestDTO(
-    val personident: Personident,
+    val personident: String,
     val vurderingType: VurderingType,
     val begrunnelse: String,
     val document: List<DocumentComponent>,

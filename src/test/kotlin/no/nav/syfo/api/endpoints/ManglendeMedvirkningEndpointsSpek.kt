@@ -64,7 +64,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
 
                 it("Successfully creates a new forhandsvarsel with varsel and pdf") {
                     val forhandsvarselRequestDTO = NewVurderingRequestDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
                         vurderingType = VurderingType.FORHANDSVARSEL,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
@@ -81,10 +81,11 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         }
                     ) {
                         response.status() shouldBeEqualTo HttpStatusCode.Created
-                        val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
+                        val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo forhandsvarselRequestDTO.personident
                         responseDTO.vurderingType shouldBeEqualTo forhandsvarselRequestDTO.vurderingType
                         responseDTO.begrunnelse shouldBeEqualTo forhandsvarselRequestDTO.begrunnelse
+                        responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo forhandsvarselRequestDTO.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo forhandsvarselRequestDTO.varselSvarfrist
 
@@ -97,7 +98,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
 
                 it("Successfully creates an STANS vurdering with pdf") {
                     val stansVurdering = NewVurderingRequestDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
                         vurderingType = VurderingType.STANS,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
@@ -114,10 +115,11 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         }
                     ) {
                         response.status() shouldBeEqualTo HttpStatusCode.Created
-                        val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
+                        val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo stansVurdering.personident
                         responseDTO.vurderingType shouldBeEqualTo stansVurdering.vurderingType
                         responseDTO.begrunnelse shouldBeEqualTo stansVurdering.begrunnelse
+                        responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo stansVurdering.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo null
 
@@ -130,7 +132,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
 
                 it("Successfully creates an OPPFYLT vurdering with pdf") {
                     val oppfyltVurdering = NewVurderingRequestDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
                         vurderingType = VurderingType.OPPFYLT,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
@@ -147,10 +149,11 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         }
                     ) {
                         response.status() shouldBeEqualTo HttpStatusCode.Created
-                        val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
+                        val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo oppfyltVurdering.personident
                         responseDTO.vurderingType shouldBeEqualTo oppfyltVurdering.vurderingType
                         responseDTO.begrunnelse shouldBeEqualTo oppfyltVurdering.begrunnelse
+                        responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo oppfyltVurdering.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo null
 
@@ -163,7 +166,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
 
                 it("Successfully creates an IKKE AKTUELL vurdering with pdf") {
                     val ikkeAktuellVurdering = NewVurderingRequestDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
                         vurderingType = VurderingType.IKKE_AKTUELL,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
@@ -180,10 +183,11 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         }
                     ) {
                         response.status() shouldBeEqualTo HttpStatusCode.Created
-                        val responseDTO = objectMapper.readValue<NewVurderingResponseDTO>(response.content!!)
+                        val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo ikkeAktuellVurdering.personident
                         responseDTO.vurderingType shouldBeEqualTo ikkeAktuellVurdering.vurderingType
                         responseDTO.begrunnelse shouldBeEqualTo ikkeAktuellVurdering.begrunnelse
+                        responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo ikkeAktuellVurdering.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo null
 
@@ -196,7 +200,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
 
                 it("Fails to create a new forhandsvarsel when document is missing") {
                     val forhandsvarselRequestDTO = NewVurderingRequestDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
                         vurderingType = VurderingType.FORHANDSVARSEL,
                         begrunnelse = "Fin begrunnelse",
                         document = emptyList(),
@@ -218,7 +222,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 }
                 it("returns status Forbidden if denied access to person") {
                     val forhandsvarselRequestDTO = NewVurderingRequestDTO(
-                        personident = ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS,
+                        personident = ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS.value,
                         vurderingType = VurderingType.FORHANDSVARSEL,
                         begrunnelse = "Fin begrunnelse",
                         document = emptyList(),
@@ -265,7 +269,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         val responseDTOList = objectMapper.readValue<List<VurderingResponseDTO>>(response.content!!)
                         responseDTOList.size shouldBeEqualTo 1
                         val vurderingResponseDTO = responseDTOList[0]
-                        vurderingResponseDTO.type shouldBeEqualTo VurderingType.FORHANDSVARSEL
+                        vurderingResponseDTO.vurderingType shouldBeEqualTo VurderingType.FORHANDSVARSEL
                         vurderingResponseDTO.personident shouldBeEqualTo personIdent
                         vurderingResponseDTO.begrunnelse shouldBeEqualTo vurdering.begrunnelse
                     }
@@ -298,8 +302,8 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         response.status() shouldBeEqualTo HttpStatusCode.OK
                         val responseDTOList = objectMapper.readValue<List<VurderingResponseDTO>>(response.content!!)
                         responseDTOList.size shouldBeEqualTo 2
-                        responseDTOList[0].type shouldBeEqualTo VurderingType.OPPFYLT
-                        responseDTOList[1].type shouldBeEqualTo VurderingType.FORHANDSVARSEL
+                        responseDTOList[0].vurderingType shouldBeEqualTo VurderingType.OPPFYLT
+                        responseDTOList[1].vurderingType shouldBeEqualTo VurderingType.FORHANDSVARSEL
                     }
                 }
                 it("Fails get vurdering when no access") {
@@ -357,7 +361,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         val responseDTO = objectMapper.readValue<VurderingerResponseDTO>(response.content!!)
                         val vurderingResponseDTO = responseDTO.vurderinger.get(personIdent)
                         vurderingResponseDTO!!.personident shouldBeEqualTo personIdent
-                        vurderingResponseDTO!!.type shouldBeEqualTo VurderingType.FORHANDSVARSEL
+                        vurderingResponseDTO.vurderingType shouldBeEqualTo VurderingType.FORHANDSVARSEL
                     }
                 }
                 it("Retrieves latest vurderinger if more than one") {
@@ -389,7 +393,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         val responseDTO = objectMapper.readValue<VurderingerResponseDTO>(response.content!!)
                         val vurderingResponseDTO = responseDTO.vurderinger.get(personIdent)
                         vurderingResponseDTO!!.personident shouldBeEqualTo personIdent
-                        vurderingResponseDTO!!.type shouldBeEqualTo VurderingType.OPPFYLT
+                        vurderingResponseDTO.vurderingType shouldBeEqualTo VurderingType.OPPFYLT
                     }
                 }
                 it("Only retrieves vurderinger for which the user has access") {

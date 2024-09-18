@@ -162,7 +162,6 @@ object JournalforingServiceSpek : Spek({
                     )
                 }
             }
-
         }
     }
 })

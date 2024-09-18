@@ -62,5 +62,14 @@ data class PVurdering(
                 document = document,
                 journalpostId = journalpostId,
             )
+            VurderingType.UNNTAK -> ManglendeMedvirkningVurdering.Unntak(
+                uuid = uuid,
+                personident = personident,
+                veilederident = veilederident,
+                createdAt = createdAt,
+                begrunnelse = begrunnelse,
+                document = document,
+                journalpostId = journalpostId,
+            )
         }
 }

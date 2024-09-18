@@ -164,6 +164,40 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                     }
                 }
 
+                it("Successfully creates an UNNTAK vurdering with pdf") {
+                    val unntakVurdering = NewVurderingRequestDTO(
+                        personident = ARBEIDSTAKER_PERSONIDENT.value,
+                        vurderingType = VurderingType.UNNTAK,
+                        begrunnelse = "Unntak fordi...",
+                        document = generateDocumentComponent(
+                            fritekst = begrunnelse,
+                            header = "Unntak"
+                        ),
+                        varselSvarfrist = null,
+                    )
+                    with(
+                        handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            addHeader(HttpHeaders.Authorization, bearerHeader(validToken))
+                            setBody(objectMapper.writeValueAsString(unntakVurdering))
+                        }
+                    ) {
+                        response.status() shouldBeEqualTo HttpStatusCode.Created
+                        val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
+                        responseDTO.personident shouldBeEqualTo unntakVurdering.personident
+                        responseDTO.vurderingType shouldBeEqualTo unntakVurdering.vurderingType
+                        responseDTO.begrunnelse shouldBeEqualTo unntakVurdering.begrunnelse
+                        responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
+                        responseDTO.document shouldBeEqualTo unntakVurdering.document
+                        responseDTO.varsel?.svarfrist shouldBeEqualTo null
+
+                        val pVurderingPdf = database.getVurderingPdf(responseDTO.uuid)
+                        pVurderingPdf?.pdf?.size shouldBeEqualTo PDF_VURDERING.size
+                        pVurderingPdf?.pdf?.get(0) shouldBeEqualTo PDF_VURDERING[0]
+                        pVurderingPdf?.pdf?.get(1) shouldBeEqualTo PDF_VURDERING[1]
+                    }
+                }
+
                 it("Successfully creates an IKKE AKTUELL vurdering with pdf") {
                     val ikkeAktuellVurdering = NewVurderingRequestDTO(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,

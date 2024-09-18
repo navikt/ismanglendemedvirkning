@@ -137,6 +137,32 @@ object JournalforingServiceSpek : Spek({
                     )
                 }
             }
+
+            it("Journalfører UNNTAK vurdering") {
+                val vurderingUnntak = generateVurdering(type = VurderingType.UNNTAK)
+                val journalpostId = runBlocking {
+                    journalforingService.journalfor(
+                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        pdf = PDF_VURDERING,
+                        vurdering = vurderingUnntak,
+                    )
+                }
+
+                journalpostId shouldBeEqualTo mockedJournalpostId
+
+                coVerify(exactly = 1) {
+                    dokarkivMock.journalfor(
+                        journalpostRequest = generateJournalpostRequest(
+                            tittel = "Vurdering av § 8-8 manglende medvirkning",
+                            brevkodeType = BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING,
+                            pdf = PDF_VURDERING,
+                            vurderingUuid = vurderingUnntak.uuid,
+                            journalpostType = JournalpostType.UTGAAENDE.name,
+                        )
+                    )
+                }
+            }
+
         }
     }
 })

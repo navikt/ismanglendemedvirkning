@@ -54,4 +54,13 @@ fun generateVurdering(
         document = document,
         journalpostId = null,
     )
+    VurderingType.UNNTAK -> ManglendeMedvirkningVurdering.Unntak(
+        uuid = UUID.randomUUID(),
+        createdAt = createdAt,
+        personident = personident,
+        veilederident = UserConstants.VEILEDER_IDENT,
+        begrunnelse = begrunnelse,
+        document = document,
+        journalpostId = null,
+    )
 }

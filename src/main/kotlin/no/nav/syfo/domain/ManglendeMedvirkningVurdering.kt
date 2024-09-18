@@ -59,11 +59,22 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val journalpostId: JournalpostId?,
     ) : ManglendeMedvirkningVurdering(VurderingType.IKKE_AKTUELL)
 
+    data class Unntak(
+        override val uuid: UUID,
+        override val personident: Personident,
+        override val veilederident: Veilederident,
+        override val createdAt: OffsetDateTime,
+        override val begrunnelse: String,
+        override val document: List<DocumentComponent>,
+        override val journalpostId: JournalpostId?,
+    ) : ManglendeMedvirkningVurdering(VurderingType.UNNTAK)
+
     fun journalfor(journalpostId: JournalpostId): ManglendeMedvirkningVurdering = when (this) {
         is Forhandsvarsel -> this.copy(journalpostId = journalpostId)
         is Oppfylt -> this.copy(journalpostId = journalpostId)
         is Stans -> this.copy(journalpostId = journalpostId)
         is IkkeAktuell -> this.copy(journalpostId = journalpostId)
+        is Unntak -> this.copy(journalpostId = journalpostId)
     }
 
     companion object {
@@ -118,6 +129,15 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
                     document = document,
                     journalpostId = null,
                 )
+                VurderingType.UNNTAK -> Unntak(
+                    uuid = UUID.randomUUID(),
+                    personident = personident,
+                    veilederident = veilederident,
+                    createdAt = OffsetDateTime.now(),
+                    begrunnelse = begrunnelse,
+                    document = document,
+                    journalpostId = null,
+                )
             }
     }
 }
@@ -127,6 +147,7 @@ enum class VurderingType(val isActive: Boolean) {
     OPPFYLT(false),
     STANS(false),
     IKKE_AKTUELL(false),
+    UNNTAK(false),
 }
 
 data class Varsel(
@@ -137,17 +158,17 @@ data class Varsel(
 
 fun VurderingType.dokumentTittel(): String = when (this) {
     VurderingType.FORHANDSVARSEL -> "Forhåndsvarsel om stans av sykepenger"
-    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL -> "Vurdering av § 8-8 manglende medvirkning"
+    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> "Vurdering av § 8-8 manglende medvirkning"
     VurderingType.STANS -> "Innstilling om stans"
 }
 
 fun VurderingType.brevkode(): BrevkodeType = when (this) {
     VurderingType.FORHANDSVARSEL -> BrevkodeType.MANGLENDE_MEDVIRKNING_FORHANDSVARSEL
-    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL -> BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING
+    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING
     VurderingType.STANS -> BrevkodeType.MANGLENDE_MEDVIRKNING_STANS
 }
 
 fun VurderingType.journalpostType(): JournalpostType = when (this) {
-    VurderingType.FORHANDSVARSEL, VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL -> JournalpostType.UTGAAENDE
+    VurderingType.FORHANDSVARSEL, VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> JournalpostType.UTGAAENDE
     VurderingType.STANS -> JournalpostType.NOTAT
 }

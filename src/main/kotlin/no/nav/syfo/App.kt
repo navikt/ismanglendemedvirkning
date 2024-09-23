@@ -68,16 +68,8 @@ fun main() {
         pdlClient = pdlClient,
     )
 
-    val vurderingRepository = VurderingRepository(
-        database = applicationDatabase,
-    )
-
-    val vurderingService = VurderingService(
-        journalforingService = journalforingService,
-        vurderingRepository = vurderingRepository,
-        vurderingProducer = vurderingProducer,
-        vurderingPdfService = vurderingPdfService,
-    )
+    lateinit var vurderingRepository: VurderingRepository
+    lateinit var vurderingService: VurderingService
 
     val applicationEngineEnvironment =
         applicationEngineEnvironment {
@@ -89,6 +81,17 @@ fun main() {
             module {
                 databaseModule(
                     databaseEnvironment = environment.database,
+                )
+
+                vurderingRepository = VurderingRepository(
+                    database = applicationDatabase,
+                )
+
+                vurderingService = VurderingService(
+                    journalforingService = journalforingService,
+                    vurderingRepository = vurderingRepository,
+                    vurderingProducer = vurderingProducer,
+                    vurderingPdfService = vurderingPdfService,
                 )
 
                 apiModule(

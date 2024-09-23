@@ -68,6 +68,17 @@ fun main() {
         pdlClient = pdlClient,
     )
 
+    val vurderingRepository = VurderingRepository(
+        database = applicationDatabase,
+    )
+
+    val vurderingService = VurderingService(
+        journalforingService = journalforingService,
+        vurderingRepository = vurderingRepository,
+        vurderingProducer = vurderingProducer,
+        vurderingPdfService = vurderingPdfService,
+    )
+
     val applicationEngineEnvironment =
         applicationEngineEnvironment {
             log = logger
@@ -80,22 +91,13 @@ fun main() {
                     databaseEnvironment = environment.database,
                 )
 
-                val vurderingRepository = VurderingRepository(
-                    database = applicationDatabase,
-                )
-
                 apiModule(
                     applicationState = applicationState,
                     environment = environment,
                     wellKnownInternalAzureAD = wellKnownInternalAzureAD,
                     database = applicationDatabase,
                     veilederTilgangskontrollClient = veilederTilgangskontrollClient,
-                    vurderingService = VurderingService(
-                        journalforingService = journalforingService,
-                        vurderingRepository = vurderingRepository,
-                        vurderingProducer = vurderingProducer,
-                        vurderingPdfService = vurderingPdfService,
-                    )
+                    vurderingService = vurderingService,
                 )
             }
         }
@@ -107,6 +109,7 @@ fun main() {
         launchCronjobs(
             applicationState = applicationState,
             environment = environment,
+            vurderingService = vurderingService,
         )
     }
 

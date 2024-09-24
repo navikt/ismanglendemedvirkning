@@ -7,7 +7,7 @@ val postgresVersion = "42.7.4"
 val postgresEmbeddedVersion = "2.0.7"
 val logbackVersion = "1.5.8"
 val logstashEncoderVersion = "7.4"
-val micrometerRegistryVersion = "1.12.8"
+val micrometerRegistryVersion = "1.13.4"
 val jacksonDatatypeVersion = "2.17.2"
 val kafkaVersion = "3.7.0"
 val ktorVersion = "2.3.12"
@@ -18,7 +18,7 @@ val kluentVersion = "1.73"
 
 plugins {
     kotlin("jvm") version "2.0.20"
-    id("com.gradleup.shadow") version "8.3.1"
+    id("com.gradleup.shadow") version "8.3.2"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
 

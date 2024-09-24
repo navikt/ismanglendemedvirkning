@@ -6,6 +6,7 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import no.nav.syfo.api.apiModule
+import no.nav.syfo.application.VarselService
 import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
 import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
@@ -17,10 +18,14 @@ import no.nav.syfo.infrastructure.clients.wellknown.getWellKnown
 import no.nav.syfo.infrastructure.cronjob.launchCronjobs
 import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
+import no.nav.syfo.infrastructure.database.repository.VarselRepository
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.infrastructure.journalforing.JournalforingService
+import no.nav.syfo.infrastructure.kafka.VarselProducer
 import no.nav.syfo.infrastructure.kafka.VurderingProducer
 import no.nav.syfo.infrastructure.kafka.VurderingRecordSerializer
+import no.nav.syfo.infrastructure.kafka.esyfovarsel.EsyfoVarselHendelseSerializer
+import no.nav.syfo.infrastructure.kafka.esyfovarsel.EsyfovarselHendelseProducer
 import no.nav.syfo.infrastructure.kafka.kafkaAivenProducerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
@@ -54,7 +59,11 @@ fun main() {
     val pdfGenClient = PdfGenClient(
         pdfGenBaseUrl = environment.clients.ispdfgen.baseUrl,
     )
-
+    val arbeidstakerForhandsvarselProducer = EsyfovarselHendelseProducer(
+        producer = KafkaProducer(
+            kafkaAivenProducerConfig<EsyfoVarselHendelseSerializer>(kafkaEnvironment = environment.kafka)
+        )
+    )
     val vurderingProducer = VurderingProducer(
         producer = KafkaProducer(kafkaAivenProducerConfig<VurderingRecordSerializer>(kafkaEnvironment = environment.kafka))
     )
@@ -68,8 +77,8 @@ fun main() {
         pdlClient = pdlClient,
     )
 
-    lateinit var vurderingRepository: VurderingRepository
     lateinit var vurderingService: VurderingService
+    lateinit var varselService: VarselService
 
     val applicationEngineEnvironment =
         applicationEngineEnvironment {
@@ -83,15 +92,22 @@ fun main() {
                     databaseEnvironment = environment.database,
                 )
 
-                vurderingRepository = VurderingRepository(
+                val vurderingRepository = VurderingRepository(
                     database = applicationDatabase,
                 )
+                val varselRepository = VarselRepository(database = applicationDatabase)
 
                 vurderingService = VurderingService(
                     journalforingService = journalforingService,
                     vurderingRepository = vurderingRepository,
                     vurderingProducer = vurderingProducer,
                     vurderingPdfService = vurderingPdfService,
+                )
+                varselService = VarselService(
+                    varselRepository = varselRepository,
+                    varselProducer = VarselProducer(
+                        arbeidstakerForhandsvarselProducer = arbeidstakerForhandsvarselProducer,
+                    ),
                 )
 
                 apiModule(
@@ -113,6 +129,7 @@ fun main() {
             applicationState = applicationState,
             environment = environment,
             vurderingService = vurderingService,
+            varselService = varselService,
         )
     }
 

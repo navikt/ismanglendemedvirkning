@@ -294,17 +294,6 @@ internal fun ResultSet.toPVurdering(): PVurdering =
         publishedAt = getObject("published_at", OffsetDateTime::class.java),
     )
 
-private fun ResultSet.toPVarsel(): PVarsel =
-    PVarsel(
-        id = getInt("id"),
-        uuid = UUID.fromString(getString("uuid")),
-        vurderingId = getInt("vurdering_id"),
-        createdAt = getObject("created_at", OffsetDateTime::class.java),
-        updatedAt = getObject("updated_at", OffsetDateTime::class.java),
-        svarfrist = getDate("svarfrist").toLocalDate(),
-        publishedAt = getObject("published_at", OffsetDateTime::class.java),
-    )
-
 fun ResultSet.toPVurderingPdf(): PVurderingPdf =
     PVurderingPdf(
         id = getInt("id"),

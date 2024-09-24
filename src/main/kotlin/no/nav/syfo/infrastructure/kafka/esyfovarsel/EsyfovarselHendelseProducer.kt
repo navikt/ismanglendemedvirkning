@@ -1,6 +1,8 @@
 package no.nav.syfo.infrastructure.kafka.esyfovarsel
 
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
+import no.nav.syfo.domain.JournalpostId
+import no.nav.syfo.domain.Personident
+import no.nav.syfo.domain.Varsel
 import no.nav.syfo.infrastructure.kafka.esyfovarsel.dto.ArbeidstakerHendelse
 import no.nav.syfo.infrastructure.kafka.esyfovarsel.dto.EsyfovarselHendelse
 import no.nav.syfo.infrastructure.kafka.esyfovarsel.dto.HendelseType
@@ -14,18 +16,18 @@ import java.util.*
 class EsyfovarselHendelseProducer(
     private val producer: KafkaProducer<String, EsyfovarselHendelse>,
 ) {
-
-    fun sendVurderingVarsel(vurdering: ManglendeMedvirkningVurdering): Result<ManglendeMedvirkningVurdering> {
-        if (vurdering.journalpostId == null)
-            throw IllegalStateException("JournalpostId is null for vurdering ${vurdering.uuid}")
-
+    fun sendArbeidstakerForhandsvarsel(
+        personIdent: Personident,
+        journalpostId: JournalpostId,
+        varsel: Varsel
+    ): Result<Varsel> {
         val varselHendelse = ArbeidstakerHendelse(
             type = HendelseType.SM_FORHANDSVARSEL_MANGLENDE_MEDVIRKNING,
-            arbeidstakerFnr = vurdering.personident.value,
+            arbeidstakerFnr = personIdent.value,
             data = VarselData(
                 journalpost = VarselDataJournalpost(
-                    uuid = vurdering.uuid.toString(),
-                    id = vurdering.journalpostId!!.value,
+                    uuid = varsel.uuid.toString(),
+                    id = journalpostId.value,
                 ),
             ),
             orgnummer = null,
@@ -35,13 +37,13 @@ class EsyfovarselHendelseProducer(
             producer.send(
                 ProducerRecord(
                     ESYFOVARSEL_TOPIC,
-                    UUID.nameUUIDFromBytes(vurdering.personident.value.toByteArray()).toString(),
+                    UUID.randomUUID().toString(),
                     varselHendelse,
                 )
             ).get()
-            Result.success(vurdering)
+            Result.success(varsel)
         } catch (e: Exception) {
-            log.error("Exception was thrown when attempting to send hendelse varsel (uuid: ${vurdering.uuid}) to esyfovarsel: ${e.message}")
+            log.error("Exception was thrown when attempting to send hendelse varsel (uuid: ${varsel.uuid}) to esyfovarsel: ${e.message}")
             Result.failure(e)
         }
     }

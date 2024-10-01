@@ -147,7 +147,20 @@ enum class VurderingType(val isActive: Boolean) {
     OPPFYLT(false),
     STANS(false),
     IKKE_AKTUELL(false),
-    UNNTAK(false),
+    UNNTAK(false);
+
+    fun brevkode(): BrevkodeType =
+        when (this) {
+            FORHANDSVARSEL -> BrevkodeType.MANGLENDE_MEDVIRKNING_FORHANDSVARSEL
+            OPPFYLT, IKKE_AKTUELL, UNNTAK -> BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING
+            STANS -> BrevkodeType.MANGLENDE_MEDVIRKNING_STANS
+        }
+
+    fun journalpostType(): JournalpostType =
+        when (this) {
+            FORHANDSVARSEL, OPPFYLT, IKKE_AKTUELL, UNNTAK -> JournalpostType.UTGAAENDE
+            STANS -> JournalpostType.NOTAT
+        }
 }
 
 data class Varsel(
@@ -155,20 +168,3 @@ data class Varsel(
     val createdAt: OffsetDateTime,
     val svarfrist: LocalDate,
 )
-
-fun VurderingType.dokumentTittel(): String = when (this) {
-    VurderingType.FORHANDSVARSEL -> "Forhåndsvarsel om stans av sykepenger"
-    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> "Vurdering av § 8-8 manglende medvirkning"
-    VurderingType.STANS -> "Innstilling om stans"
-}
-
-fun VurderingType.brevkode(): BrevkodeType = when (this) {
-    VurderingType.FORHANDSVARSEL -> BrevkodeType.MANGLENDE_MEDVIRKNING_FORHANDSVARSEL
-    VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING
-    VurderingType.STANS -> BrevkodeType.MANGLENDE_MEDVIRKNING_STANS
-}
-
-fun VurderingType.journalpostType(): JournalpostType = when (this) {
-    VurderingType.FORHANDSVARSEL, VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> JournalpostType.UTGAAENDE
-    VurderingType.STANS -> JournalpostType.NOTAT
-}

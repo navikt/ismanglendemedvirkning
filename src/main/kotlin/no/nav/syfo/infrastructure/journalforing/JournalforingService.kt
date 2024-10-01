@@ -32,14 +32,15 @@ class JournalforingService(
         pdf: ByteArray,
         vurdering: ManglendeMedvirkningVurdering,
     ): JournalpostRequest {
-        val avsenderMottaker = if (vurdering.vurderingType.journalpostType() != JournalpostType.NOTAT) {
+        val journalpostType = JournalpostType.fromVurderingType(vurdering.vurderingType)
+        val avsenderMottaker = if (journalpostType == JournalpostType.NOTAT) {
+            null
+        } else {
             AvsenderMottaker(
                 id = personIdent.value,
                 idType = BrukerIdType.PERSON_IDENT.value,
                 navn = navn,
             )
-        } else {
-            null
         }
         val bruker = Bruker(
             id = personIdent.value,
@@ -50,7 +51,7 @@ class JournalforingService(
 
         val dokumenter = listOf(
             Dokument(
-                brevkode = vurdering.vurderingType.brevkode().value,
+                brevkode = BrevkodeType.fromVurderingType(vurdering.vurderingType).value,
                 dokumentvarianter = listOf(
                     Dokumentvariant(
                         filnavn = dokumentTittel,
@@ -64,7 +65,7 @@ class JournalforingService(
         )
 
         return JournalpostRequest(
-            journalpostType = vurdering.vurderingType.journalpostType().name,
+            journalpostType = JournalpostType.fromVurderingType(vurdering.vurderingType).name,
             avsenderMottaker = avsenderMottaker,
             tittel = dokumentTittel,
             bruker = bruker,

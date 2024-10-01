@@ -1,10 +1,20 @@
 package no.nav.syfo.infrastructure.clients.dokarkiv.dto
 
+import no.nav.syfo.domain.VurderingType
+
 private const val JOURNALFORENDE_ENHET = 9999
 
 enum class JournalpostType {
     UTGAAENDE,
-    NOTAT,
+    NOTAT;
+
+    companion object {
+        fun fromVurderingType(vurderingType: VurderingType): JournalpostType =
+            when (vurderingType) {
+                VurderingType.FORHANDSVARSEL, VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> UTGAAENDE
+                VurderingType.STANS -> NOTAT
+            }
+    }
 }
 
 enum class JournalpostTema(val value: String) {

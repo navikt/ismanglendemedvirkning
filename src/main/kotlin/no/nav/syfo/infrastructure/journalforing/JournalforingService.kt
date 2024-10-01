@@ -32,11 +32,15 @@ class JournalforingService(
         pdf: ByteArray,
         vurdering: ManglendeMedvirkningVurdering,
     ): JournalpostRequest {
-        val avsenderMottaker = AvsenderMottaker(
-            id = personIdent.value,
-            idType = BrukerIdType.PERSON_IDENT.value,
-            navn = navn,
-        )
+        val avsenderMottaker = if (vurdering.vurderingType.journalpostType() != JournalpostType.NOTAT) {
+            AvsenderMottaker(
+                id = personIdent.value,
+                idType = BrukerIdType.PERSON_IDENT.value,
+                navn = navn,
+            )
+        } else {
+            null
+        }
         val bruker = Bruker(
             id = personIdent.value,
             idType = BrukerIdType.PERSON_IDENT.value,
@@ -69,3 +73,10 @@ class JournalforingService(
         )
     }
 }
+
+fun VurderingType.dokumentTittel(): String =
+    when (this) {
+        VurderingType.FORHANDSVARSEL -> "Forhåndsvarsel om stans av sykepenger"
+        VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> "Vurdering av § 8-8 manglende medvirkning"
+        VurderingType.STANS -> "Innstilling om stans"
+    }

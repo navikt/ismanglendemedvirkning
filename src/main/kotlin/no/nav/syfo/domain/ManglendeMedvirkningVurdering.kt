@@ -1,7 +1,5 @@
 package no.nav.syfo.domain
 
-import no.nav.syfo.infrastructure.clients.dokarkiv.dto.BrevkodeType
-import no.nav.syfo.infrastructure.clients.dokarkiv.dto.JournalpostType
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -148,19 +146,6 @@ enum class VurderingType(val isActive: Boolean) {
     STANS(false),
     IKKE_AKTUELL(false),
     UNNTAK(false);
-
-    fun brevkode(): BrevkodeType =
-        when (this) {
-            FORHANDSVARSEL -> BrevkodeType.MANGLENDE_MEDVIRKNING_FORHANDSVARSEL
-            OPPFYLT, IKKE_AKTUELL, UNNTAK -> BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING
-            STANS -> BrevkodeType.MANGLENDE_MEDVIRKNING_STANS
-        }
-
-    fun journalpostType(): JournalpostType =
-        when (this) {
-            FORHANDSVARSEL, OPPFYLT, IKKE_AKTUELL, UNNTAK -> JournalpostType.UTGAAENDE
-            STANS -> JournalpostType.NOTAT
-        }
 }
 
 data class Varsel(

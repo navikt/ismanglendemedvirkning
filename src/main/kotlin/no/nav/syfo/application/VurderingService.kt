@@ -1,13 +1,11 @@
 package no.nav.syfo.application
 
+import no.nav.syfo.application.model.NewVurderingRequestDTO
 import no.nav.syfo.domain.*
-import no.nav.syfo.domain.DocumentComponent
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Veilederident
-import no.nav.syfo.domain.VurderingType
+import no.nav.syfo.domain.Vurdering
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 class VurderingService(
     private val journalforingService: IJournalforingService,
@@ -17,22 +15,48 @@ class VurderingService(
 ) {
 
     suspend fun createNewVurdering(
-        personident: Personident,
         veilederident: Veilederident,
-        vurderingType: VurderingType,
-        begrunnelse: String,
-        document: List<DocumentComponent>,
-        varselSvarfrist: LocalDate?,
+        newVurdering: NewVurderingRequestDTO,
         callId: String,
-    ): ManglendeMedvirkningVurdering {
-        val newVurdering = ManglendeMedvirkningVurdering.create(
-            personident = personident,
-            veilederident = veilederident,
-            begrunnelse = begrunnelse,
-            document = document,
-            varselSvarfrist = varselSvarfrist,
-            type = vurderingType,
-        )
+    ): Vurdering {
+        val newVurdering = when (newVurdering) {
+            is NewVurderingRequestDTO.Forhandsvarsel ->
+                Vurdering.createForhandsvarsel(
+                    personident = Personident(newVurdering.personident),
+                    veilederident = veilederident,
+                    begrunnelse = newVurdering.begrunnelse,
+                    document = newVurdering.document,
+                    varselSvarfrist = newVurdering.varselSvarfrist,
+                )
+            is NewVurderingRequestDTO.Oppfylt ->
+                Vurdering.createOppfylt(
+                    personident = Personident(newVurdering.personident),
+                    veilederident = veilederident,
+                    begrunnelse = newVurdering.begrunnelse,
+                    document = newVurdering.document,
+                )
+            is NewVurderingRequestDTO.Stans ->
+                Vurdering.createStans(
+                    personident = Personident(newVurdering.personident),
+                    veilederident = veilederident,
+                    begrunnelse = newVurdering.begrunnelse,
+                    document = newVurdering.document,
+                )
+            is NewVurderingRequestDTO.IkkeAktuell ->
+                Vurdering.createIkkeAktuell(
+                    personident = Personident(newVurdering.personident),
+                    veilederident = veilederident,
+                    begrunnelse = newVurdering.begrunnelse,
+                    document = newVurdering.document,
+                )
+            is NewVurderingRequestDTO.Unntak ->
+                Vurdering.createUnntak(
+                    personident = Personident(newVurdering.personident),
+                    veilederident = veilederident,
+                    begrunnelse = newVurdering.begrunnelse,
+                    document = newVurdering.document,
+                )
+        }
 
         val pdf = vurderingPdfService.createVurderingPdf(
             vurdering = newVurdering,
@@ -53,10 +77,10 @@ class VurderingService(
 
     fun getVurderinger(
         personident: Personident,
-    ): List<ManglendeMedvirkningVurdering> =
+    ): List<Vurdering> =
         vurderingRepository.getVurderinger(personident)
 
-    suspend fun journalforVurderinger(): List<Result<ManglendeMedvirkningVurdering>> {
+    suspend fun journalforVurderinger(): List<Result<Vurdering>> {
         val notJournalforteVurderinger = vurderingRepository.getNotJournalforteVurderinger()
 
         return notJournalforteVurderinger.map { (vurdering, pdf) ->
@@ -78,7 +102,7 @@ class VurderingService(
 
     fun getLatestVurderingForPersoner(
         personidenter: List<Personident>,
-    ): Map<Personident, ManglendeMedvirkningVurdering> =
+    ): Map<Personident, Vurdering> =
         vurderingRepository.getLatestVurderingForPersoner(personidenter)
 
     companion object {

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference
 import no.nav.syfo.application.IVurderingRepository
 import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.domain.JournalpostId
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Varsel
 import no.nav.syfo.domain.Veilederident
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.database.toList
@@ -26,13 +26,13 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
     private val mapper = configuredJacksonMapper()
 
     override fun saveManglendeMedvirkningVurdering(
-        vurdering: ManglendeMedvirkningVurdering,
+        vurdering: Vurdering,
         vurderingPdf: ByteArray,
-    ): ManglendeMedvirkningVurdering =
+    ): Vurdering =
         database.connection.use { connection ->
             val pVurdering = connection.saveVurdering(vurdering)
             val pVarsel = when (vurdering) {
-                is ManglendeMedvirkningVurdering.Forhandsvarsel -> connection.saveVarsel(pVurdering.id, vurdering.varsel)
+                is Vurdering.Forhandsvarsel -> connection.saveVarsel(pVurdering.id, vurdering.varsel)
                 else -> null
             }
             connection.saveVurderingPdf(pVurdering.id, pVurdering.createdAt, vurderingPdf)
@@ -68,7 +68,7 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             connection.commit()
         }
 
-    override fun setJournalpostId(vurdering: ManglendeMedvirkningVurdering) = database.connection.use { connection ->
+    override fun setJournalpostId(vurdering: Vurdering) = database.connection.use { connection ->
         connection.prepareStatement(UPDATE_JOURNALPOST_ID).use {
             it.setString(1, vurdering.journalpostId?.value)
             it.setObject(2, nowUTC())
@@ -81,7 +81,7 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
         connection.commit()
     }
 
-    override fun getNotJournalforteVurderinger(): List<Pair<ManglendeMedvirkningVurdering, ByteArray>> =
+    override fun getNotJournalforteVurderinger(): List<Pair<Vurdering, ByteArray>> =
         database.connection.use { connection ->
             connection.prepareStatement(GET_NOT_JOURNALFORT_VURDERING).use {
                 it.executeQuery().toList {
@@ -98,7 +98,7 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
 
     override fun getLatestVurderingForPersoner(
         personidenter: List<Personident>,
-    ): Map<Personident, ManglendeMedvirkningVurdering> =
+    ): Map<Personident, Vurdering> =
         database.connection.use { connection ->
             connection.prepareStatement(GET_VURDERINGER).use { preparedStatement ->
                 preparedStatement.setString(1, personidenter.joinToString(",") { it.value })
@@ -123,7 +123,7 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             }
         }
 
-    private fun Connection.saveVurdering(vurdering: ManglendeMedvirkningVurdering): PVurdering {
+    private fun Connection.saveVurdering(vurdering: Vurdering): PVurdering {
         val pVurdering = this.prepareStatement(INSERT_INTO_VURDERING).use {
             it.setString(1, vurdering.uuid.toString())
             it.setString(2, vurdering.personident.value)

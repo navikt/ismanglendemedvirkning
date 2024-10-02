@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
-interface IManglendeMedvirkningsVurdering {
+interface IVurdering {
     val uuid: UUID
     val personident: Personident
     val veilederident: Veilederident
@@ -14,7 +14,7 @@ interface IManglendeMedvirkningsVurdering {
     val journalpostId: JournalpostId?
 }
 
-sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : IManglendeMedvirkningsVurdering {
+sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
 
     data class Forhandsvarsel(
         override val uuid: UUID,
@@ -25,7 +25,7 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
         val varsel: Varsel,
-    ) : ManglendeMedvirkningVurdering(VurderingType.FORHANDSVARSEL)
+    ) : Vurdering(VurderingType.FORHANDSVARSEL)
 
     data class Oppfylt(
         override val uuid: UUID,
@@ -35,7 +35,7 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val begrunnelse: String,
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
-    ) : ManglendeMedvirkningVurdering(VurderingType.OPPFYLT)
+    ) : Vurdering(VurderingType.OPPFYLT)
 
     data class Stans(
         override val uuid: UUID,
@@ -45,7 +45,7 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val begrunnelse: String,
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
-    ) : ManglendeMedvirkningVurdering(VurderingType.STANS)
+    ) : Vurdering(VurderingType.STANS)
 
     data class IkkeAktuell(
         override val uuid: UUID,
@@ -55,7 +55,7 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val begrunnelse: String,
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
-    ) : ManglendeMedvirkningVurdering(VurderingType.IKKE_AKTUELL)
+    ) : Vurdering(VurderingType.IKKE_AKTUELL)
 
     data class Unntak(
         override val uuid: UUID,
@@ -65,9 +65,9 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
         override val begrunnelse: String,
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
-    ) : ManglendeMedvirkningVurdering(VurderingType.UNNTAK)
+    ) : Vurdering(VurderingType.UNNTAK)
 
-    fun journalfor(journalpostId: JournalpostId): ManglendeMedvirkningVurdering = when (this) {
+    fun journalfor(journalpostId: JournalpostId): Vurdering = when (this) {
         is Forhandsvarsel -> this.copy(journalpostId = journalpostId)
         is Oppfylt -> this.copy(journalpostId = journalpostId)
         is Stans -> this.copy(journalpostId = journalpostId)
@@ -76,67 +76,87 @@ sealed class ManglendeMedvirkningVurdering(val vurderingType: VurderingType) : I
     }
 
     companion object {
-
-        fun create(
+        fun createForhandsvarsel(
             personident: Personident,
             veilederident: Veilederident,
             begrunnelse: String,
             document: List<DocumentComponent>,
             varselSvarfrist: LocalDate?,
-            type: VurderingType,
-        ): ManglendeMedvirkningVurdering =
-            when (type) {
-                VurderingType.FORHANDSVARSEL -> Forhandsvarsel(
+        ): Forhandsvarsel =
+            Forhandsvarsel(
+                uuid = UUID.randomUUID(),
+                personident = personident,
+                veilederident = veilederident,
+                createdAt = OffsetDateTime.now(),
+                begrunnelse = begrunnelse,
+                document = document,
+                journalpostId = null,
+                varsel = Varsel(
                     uuid = UUID.randomUUID(),
-                    personident = personident,
-                    veilederident = veilederident,
                     createdAt = OffsetDateTime.now(),
-                    begrunnelse = begrunnelse,
-                    document = document,
-                    journalpostId = null,
-                    varsel = Varsel(
-                        uuid = UUID.randomUUID(),
-                        createdAt = OffsetDateTime.now(),
-                        svarfrist = varselSvarfrist!!,
-                    ),
-                )
-                VurderingType.IKKE_AKTUELL -> IkkeAktuell(
-                    uuid = UUID.randomUUID(),
-                    personident = personident,
-                    veilederident = veilederident,
-                    createdAt = OffsetDateTime.now(),
-                    begrunnelse = begrunnelse,
-                    document = document,
-                    journalpostId = null,
-                )
-                VurderingType.STANS -> Stans(
-                    uuid = UUID.randomUUID(),
-                    personident = personident,
-                    veilederident = veilederident,
-                    createdAt = OffsetDateTime.now(),
-                    begrunnelse = begrunnelse,
-                    document = document,
-                    journalpostId = null,
-                )
-                VurderingType.OPPFYLT -> Oppfylt(
-                    uuid = UUID.randomUUID(),
-                    personident = personident,
-                    veilederident = veilederident,
-                    createdAt = OffsetDateTime.now(),
-                    begrunnelse = begrunnelse,
-                    document = document,
-                    journalpostId = null,
-                )
-                VurderingType.UNNTAK -> Unntak(
-                    uuid = UUID.randomUUID(),
-                    personident = personident,
-                    veilederident = veilederident,
-                    createdAt = OffsetDateTime.now(),
-                    begrunnelse = begrunnelse,
-                    document = document,
-                    journalpostId = null,
-                )
-            }
+                    svarfrist = varselSvarfrist!!,
+                ),
+            )
+
+        fun createIkkeAktuell(
+            personident: Personident,
+            veilederident: Veilederident,
+            begrunnelse: String,
+            document: List<DocumentComponent>,
+        ) = IkkeAktuell(
+            uuid = UUID.randomUUID(),
+            personident = personident,
+            veilederident = veilederident,
+            createdAt = OffsetDateTime.now(),
+            begrunnelse = begrunnelse,
+            document = document,
+            journalpostId = null,
+        )
+
+        fun createOppfylt(
+            personident: Personident,
+            veilederident: Veilederident,
+            begrunnelse: String,
+            document: List<DocumentComponent>,
+        ) = Oppfylt(
+            uuid = UUID.randomUUID(),
+            personident = personident,
+            veilederident = veilederident,
+            createdAt = OffsetDateTime.now(),
+            begrunnelse = begrunnelse,
+            document = document,
+            journalpostId = null,
+        )
+
+        fun createStans(
+            personident: Personident,
+            veilederident: Veilederident,
+            begrunnelse: String,
+            document: List<DocumentComponent>,
+        ) = Stans(
+            uuid = UUID.randomUUID(),
+            personident = personident,
+            veilederident = veilederident,
+            createdAt = OffsetDateTime.now(),
+            begrunnelse = begrunnelse,
+            document = document,
+            journalpostId = null,
+        )
+
+        fun createUnntak(
+            personident: Personident,
+            veilederident: Veilederident,
+            begrunnelse: String,
+            document: List<DocumentComponent>,
+        ) = Unntak(
+            uuid = UUID.randomUUID(),
+            personident = personident,
+            veilederident = veilederident,
+            createdAt = OffsetDateTime.now(),
+            begrunnelse = begrunnelse,
+            document = document,
+            journalpostId = null,
+        )
     }
 }
 

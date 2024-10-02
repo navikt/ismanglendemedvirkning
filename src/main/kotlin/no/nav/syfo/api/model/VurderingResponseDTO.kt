@@ -17,7 +17,7 @@ data class VurderingResponseDTO private constructor(
     val varsel: VarselDTO?,
 ) {
     companion object {
-        fun fromVurdering(vurdering: ManglendeMedvirkningVurdering) = VurderingResponseDTO(
+        fun fromVurdering(vurdering: Vurdering) = VurderingResponseDTO(
             uuid = vurdering.uuid,
             personident = vurdering.personident.value,
             createdAt = vurdering.createdAt.toLocalDateTimeOslo(),
@@ -25,7 +25,7 @@ data class VurderingResponseDTO private constructor(
             veilederident = vurdering.veilederident.value,
             begrunnelse = vurdering.begrunnelse,
             document = vurdering.document,
-            varsel = if (vurdering is ManglendeMedvirkningVurdering.Forhandsvarsel) VarselDTO.fromVarsel(vurdering.varsel) else null,
+            varsel = if (vurdering is Vurdering.Forhandsvarsel) VarselDTO.fromVarsel(vurdering.varsel) else null,
         )
     }
 }

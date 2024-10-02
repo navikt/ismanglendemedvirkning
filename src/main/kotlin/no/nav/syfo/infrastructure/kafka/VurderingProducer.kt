@@ -1,10 +1,10 @@
 package no.nav.syfo.infrastructure.kafka
 
 import no.nav.syfo.application.IVurderingProducer
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Varsel
 import no.nav.syfo.domain.Veilederident
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.util.configuredJacksonMapper
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -16,7 +16,7 @@ import java.util.UUID
 
 class VurderingProducer(private val producer: KafkaProducer<String, VurderingRecord>) : IVurderingProducer {
 
-    override fun publishVurdering(vurdering: ManglendeMedvirkningVurdering): Result<ManglendeMedvirkningVurdering> =
+    override fun publishVurdering(vurdering: Vurdering): Result<Vurdering> =
         try {
             producer.send(
                 ProducerRecord(
@@ -49,7 +49,7 @@ data class VurderingRecord(
     val vurderingType: VurderingTypeDTO,
 ) {
     companion object {
-        fun fromVurdering(vurdering: ManglendeMedvirkningVurdering): VurderingRecord =
+        fun fromVurdering(vurdering: Vurdering): VurderingRecord =
             VurderingRecord(
                 uuid = vurdering.uuid,
                 personident = vurdering.personident,
@@ -57,7 +57,7 @@ data class VurderingRecord(
                 createdAt = vurdering.createdAt,
                 begrunnelse = vurdering.begrunnelse,
                 varsel = when (vurdering) {
-                    is ManglendeMedvirkningVurdering.Forhandsvarsel -> vurdering.varsel
+                    is Vurdering.Forhandsvarsel -> vurdering.varsel
                     else -> null
                 },
                 vurderingType = VurderingTypeDTO(

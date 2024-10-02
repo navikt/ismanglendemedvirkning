@@ -9,8 +9,9 @@ import no.nav.syfo.UserConstants.PDF_FORHANDSVARSEL
 import no.nav.syfo.UserConstants.PDF_STANS
 import no.nav.syfo.UserConstants.PDF_VURDERING
 import no.nav.syfo.UserConstants.VEILEDER_IDENT
+import no.nav.syfo.application.model.NewVurderingRequestDTO
 import no.nav.syfo.domain.JournalpostId
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering.Forhandsvarsel
+import no.nav.syfo.domain.Vurdering.Forhandsvarsel
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateVurdering
 import no.nav.syfo.infrastructure.clients.pdfgen.VurderingPdfService
@@ -76,12 +77,13 @@ class VurderingServiceSpek : Spek({
             it("Lagrer vurdering") {
                 val savedVurdering = runBlocking {
                     vurderingService.createNewVurdering(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
                         veilederident = VEILEDER_IDENT,
-                        vurderingType = VurderingType.FORHANDSVARSEL,
-                        begrunnelse = "Begrunnelse",
-                        document = emptyList(),
-                        varselSvarfrist = LocalDate.now().plusDays(14),
+                        newVurdering = NewVurderingRequestDTO.Forhandsvarsel(
+                            personident = ARBEIDSTAKER_PERSONIDENT.value,
+                            begrunnelse = "Begrunnelse",
+                            document = emptyList(),
+                            varselSvarfrist = LocalDate.now().plusDays(14),
+                        ),
                         callId = "callId",
                     )
                 }
@@ -106,12 +108,13 @@ class VurderingServiceSpek : Spek({
 
                 val savedVurdering = runBlocking {
                     vurderingService.createNewVurdering(
-                        personident = ARBEIDSTAKER_PERSONIDENT,
                         veilederident = VEILEDER_IDENT,
-                        vurderingType = VurderingType.FORHANDSVARSEL,
-                        begrunnelse = "Begrunnelse",
-                        document = emptyList(),
-                        varselSvarfrist = LocalDate.now().plusDays(14),
+                        newVurdering = NewVurderingRequestDTO.Forhandsvarsel(
+                            personident = ARBEIDSTAKER_PERSONIDENT.value,
+                            begrunnelse = "Begrunnelse",
+                            document = emptyList(),
+                            varselSvarfrist = LocalDate.now().plusDays(14),
+                        ),
                         callId = "callId",
                     )
                 }

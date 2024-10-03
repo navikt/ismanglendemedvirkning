@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.syfo.api.model.*
 import no.nav.syfo.application.VurderingService
+import no.nav.syfo.application.model.NewVurderingRequestDTO
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.infrastructure.NAV_PERSONIDENT_HEADER
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
@@ -47,11 +48,10 @@ fun Route.registerManglendeMedvirkningEndpoints(
 
         post("/vurderinger") {
             val requestDTO = call.receive<NewVurderingRequestDTO>()
-            val personident = Personident(requestDTO.personident)
 
             validateVeilederAccess(
                 action = "POST /vurderinger",
-                personident = personident,
+                personident = Personident(requestDTO.personident),
                 veilederTilgangskontrollClient = veilederTilgangskontrollClient,
             ) {
                 val callId = call.getCallId()
@@ -60,12 +60,8 @@ fun Route.registerManglendeMedvirkningEndpoints(
                 }
 
                 val newVurdering = vurderingService.createNewVurdering(
-                    personident = personident,
                     veilederident = call.getNAVIdent(),
-                    vurderingType = requestDTO.vurderingType,
-                    begrunnelse = requestDTO.begrunnelse,
-                    document = requestDTO.document,
-                    varselSvarfrist = requestDTO.varselSvarfrist,
+                    newVurdering = requestDTO,
                     callId = callId,
                 )
 

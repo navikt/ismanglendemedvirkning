@@ -1,10 +1,10 @@
 package no.nav.syfo.application
 
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
+import no.nav.syfo.domain.Vurdering
 
 interface IVurderingPdfService {
     suspend fun createVurderingPdf(
-        vurdering: ManglendeMedvirkningVurdering,
+        vurdering: Vurdering,
         callId: String,
     ): ByteArray
 }

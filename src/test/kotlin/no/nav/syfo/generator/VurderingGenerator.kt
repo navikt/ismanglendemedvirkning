@@ -13,7 +13,7 @@ fun generateVurdering(
     type: VurderingType,
     createdAt: OffsetDateTime = OffsetDateTime.now(),
 ) = when (type) {
-    VurderingType.FORHANDSVARSEL -> ManglendeMedvirkningVurdering.Forhandsvarsel(
+    VurderingType.FORHANDSVARSEL -> Vurdering.Forhandsvarsel(
         uuid = UUID.randomUUID(),
         createdAt = createdAt,
         personident = personident,
@@ -27,7 +27,7 @@ fun generateVurdering(
             svarfrist = LocalDate.now().plusWeeks(3),
         ),
     )
-    VurderingType.OPPFYLT -> ManglendeMedvirkningVurdering.Oppfylt(
+    VurderingType.OPPFYLT -> Vurdering.Oppfylt(
         uuid = UUID.randomUUID(),
         createdAt = createdAt,
         personident = personident,
@@ -36,7 +36,7 @@ fun generateVurdering(
         document = document,
         journalpostId = null,
     )
-    VurderingType.IKKE_AKTUELL -> ManglendeMedvirkningVurdering.IkkeAktuell(
+    VurderingType.IKKE_AKTUELL -> Vurdering.IkkeAktuell(
         uuid = UUID.randomUUID(),
         createdAt = createdAt,
         personident = personident,
@@ -45,7 +45,7 @@ fun generateVurdering(
         document = document,
         journalpostId = null,
     )
-    VurderingType.STANS -> ManglendeMedvirkningVurdering.Stans(
+    VurderingType.STANS -> Vurdering.Stans(
         uuid = UUID.randomUUID(),
         createdAt = createdAt,
         personident = personident,
@@ -54,7 +54,7 @@ fun generateVurdering(
         document = document,
         journalpostId = null,
     )
-    VurderingType.UNNTAK -> ManglendeMedvirkningVurdering.Unntak(
+    VurderingType.UNNTAK -> Vurdering.Unntak(
         uuid = UUID.randomUUID(),
         createdAt = createdAt,
         personident = personident,

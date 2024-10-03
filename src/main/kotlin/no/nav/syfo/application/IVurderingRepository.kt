@@ -1,22 +1,22 @@
 package no.nav.syfo.application
 
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
+import no.nav.syfo.domain.Vurdering
 import java.util.UUID
 
 interface IVurderingRepository {
     fun saveManglendeMedvirkningVurdering(
-        vurdering: ManglendeMedvirkningVurdering,
+        vurdering: Vurdering,
         vurderingPdf: ByteArray,
-    ): ManglendeMedvirkningVurdering
+    ): Vurdering
 
-    fun setJournalpostId(vurdering: ManglendeMedvirkningVurdering)
+    fun setJournalpostId(vurdering: Vurdering)
 
-    fun getNotJournalforteVurderinger(): List<Pair<ManglendeMedvirkningVurdering, ByteArray>>
+    fun getNotJournalforteVurderinger(): List<Pair<Vurdering, ByteArray>>
 
     fun updatePublishedAt(vurderingUuid: UUID)
 
-    fun getVurderinger(personident: Personident): List<ManglendeMedvirkningVurdering>
+    fun getVurderinger(personident: Personident): List<Vurdering>
 
-    fun getLatestVurderingForPersoner(personidenter: List<Personident>): Map<Personident, ManglendeMedvirkningVurdering>
+    fun getLatestVurderingForPersoner(personidenter: List<Personident>): Map<Personident, Vurdering>
 }

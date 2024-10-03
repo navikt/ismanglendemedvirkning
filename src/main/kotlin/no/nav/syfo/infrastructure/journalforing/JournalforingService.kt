@@ -13,7 +13,7 @@ class JournalforingService(
     override suspend fun journalfor(
         personident: Personident,
         pdf: ByteArray,
-        vurdering: ManglendeMedvirkningVurdering,
+        vurdering: Vurdering,
     ): Int {
         val navn = pdlClient.getPerson(personident).fullName
         val journalpostRequest = createJournalpostRequest(
@@ -30,7 +30,7 @@ class JournalforingService(
         personIdent: Personident,
         navn: String,
         pdf: ByteArray,
-        vurdering: ManglendeMedvirkningVurdering,
+        vurdering: Vurdering,
     ): JournalpostRequest {
         val journalpostType = JournalpostType.fromVurderingType(vurdering.vurderingType)
         val avsenderMottaker = if (journalpostType == JournalpostType.NOTAT) {

@@ -4,8 +4,8 @@ import io.ktor.server.testing.TestApplicationEngine
 import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.UserConstants.VEILEDER_IDENT
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Varsel
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.util.nowUTC
 import org.amshove.kluent.shouldBeEqualTo
@@ -27,7 +27,7 @@ class VurderingRepositorySpek : Spek({
 
             describe("saveVurdering") {
                 it("saves a vurdering") {
-                    val vurdering = ManglendeMedvirkningVurdering.Oppfylt(
+                    val vurdering = Vurdering.Oppfylt(
                         uuid = UUID.randomUUID(),
                         personident = ARBEIDSTAKER_PERSONIDENT,
                         veilederident = VEILEDER_IDENT,
@@ -46,7 +46,7 @@ class VurderingRepositorySpek : Spek({
 
                 it("saves a vurdering with a varsel") {
                     val now = nowUTC()
-                    val vurdering = ManglendeMedvirkningVurdering.Forhandsvarsel(
+                    val vurdering = Vurdering.Forhandsvarsel(
                         uuid = UUID.randomUUID(),
                         personident = ARBEIDSTAKER_PERSONIDENT,
                         veilederident = VEILEDER_IDENT,
@@ -62,7 +62,7 @@ class VurderingRepositorySpek : Spek({
                     )
                     val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
                     when (savedVurdering) {
-                        is ManglendeMedvirkningVurdering.Forhandsvarsel -> {
+                        is Vurdering.Forhandsvarsel -> {
                             savedVurdering.personident shouldBeEqualTo vurdering.personident
                             savedVurdering.veilederident shouldBeEqualTo vurdering.veilederident
                             savedVurdering.begrunnelse shouldBeEqualTo vurdering.begrunnelse

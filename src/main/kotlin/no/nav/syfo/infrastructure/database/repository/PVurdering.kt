@@ -1,11 +1,11 @@
 package no.nav.syfo.infrastructure.database.repository
 
+import no.nav.syfo.domain.DocumentComponent
 import no.nav.syfo.domain.JournalpostId
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Veilederident
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.VurderingType
-import no.nav.syfo.domain.DocumentComponent
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -25,7 +25,7 @@ data class PVurdering(
 
     fun toManglendeMedvirkningVurdering(pVarsel: PVarsel?) =
         when (type) {
-            VurderingType.FORHANDSVARSEL -> ManglendeMedvirkningVurdering.Forhandsvarsel(
+            VurderingType.FORHANDSVARSEL -> Vurdering.Forhandsvarsel(
                 uuid = uuid,
                 personident = personident,
                 veilederident = veilederident,
@@ -35,7 +35,7 @@ data class PVurdering(
                 journalpostId = journalpostId,
                 varsel = pVarsel!!.toVarsel(),
             )
-            VurderingType.OPPFYLT -> ManglendeMedvirkningVurdering.Oppfylt(
+            VurderingType.OPPFYLT -> Vurdering.Oppfylt(
                 uuid = uuid,
                 personident = personident,
                 veilederident = veilederident,
@@ -44,7 +44,7 @@ data class PVurdering(
                 document = document,
                 journalpostId = journalpostId,
             )
-            VurderingType.STANS -> ManglendeMedvirkningVurdering.Stans(
+            VurderingType.STANS -> Vurdering.Stans(
                 uuid = uuid,
                 personident = personident,
                 veilederident = veilederident,
@@ -53,7 +53,7 @@ data class PVurdering(
                 document = document,
                 journalpostId = journalpostId,
             )
-            VurderingType.IKKE_AKTUELL -> ManglendeMedvirkningVurdering.IkkeAktuell(
+            VurderingType.IKKE_AKTUELL -> Vurdering.IkkeAktuell(
                 uuid = uuid,
                 personident = personident,
                 veilederident = veilederident,
@@ -62,7 +62,7 @@ data class PVurdering(
                 document = document,
                 journalpostId = journalpostId,
             )
-            VurderingType.UNNTAK -> ManglendeMedvirkningVurdering.Unntak(
+            VurderingType.UNNTAK -> Vurdering.Unntak(
                 uuid = uuid,
                 personident = personident,
                 veilederident = veilederident,

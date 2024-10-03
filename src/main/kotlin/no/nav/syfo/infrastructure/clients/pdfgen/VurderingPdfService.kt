@@ -1,7 +1,7 @@
 package no.nav.syfo.infrastructure.clients.pdfgen
 
 import no.nav.syfo.application.IVurderingPdfService
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
 
@@ -11,7 +11,7 @@ class VurderingPdfService(
 ) : IVurderingPdfService {
 
     override suspend fun createVurderingPdf(
-        vurdering: ManglendeMedvirkningVurdering,
+        vurdering: Vurdering,
         callId: String,
     ): ByteArray {
         val personNavn = pdlClient.getPerson(vurdering.personident).fullName

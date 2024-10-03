@@ -4,8 +4,8 @@ import io.mockk.*
 import no.nav.syfo.ExternalMockEnvironment
 import no.nav.syfo.UserConstants
 import no.nav.syfo.domain.JournalpostId
-import no.nav.syfo.domain.ManglendeMedvirkningVurdering
 import no.nav.syfo.domain.Varsel
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateVurdering
 import no.nav.syfo.infrastructure.database.dropData
@@ -55,7 +55,7 @@ class VarselServiceSpek : Spek({
 
         val vurderingForhandsvarsel = generateVurdering(
             type = VurderingType.FORHANDSVARSEL,
-        ) as ManglendeMedvirkningVurdering.Forhandsvarsel
+        ) as Vurdering.Forhandsvarsel
 
         fun createUnpublishedVarsel(): Varsel {
             vurderingRepository.saveManglendeMedvirkningVurdering(

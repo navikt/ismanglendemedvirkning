@@ -16,6 +16,7 @@ import no.nav.syfo.api.model.*
 import no.nav.syfo.api.testApiModule
 import no.nav.syfo.api.testDeniedPersonAccess
 import no.nav.syfo.api.testMissingToken
+import no.nav.syfo.application.model.NewVurderingRequestDTO
 import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateDocumentComponent
@@ -63,9 +64,8 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 val begrunnelse = "Dette er en begrunnelse for vurdering av 8-8"
 
                 it("Successfully creates a new forhandsvarsel with varsel and pdf") {
-                    val forhandsvarselRequestDTO = NewVurderingRequestDTO(
+                    val forhandsvarselRequestDTO = NewVurderingRequestDTO.Forhandsvarsel(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        vurderingType = VurderingType.FORHANDSVARSEL,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
                             fritekst = begrunnelse,
@@ -73,6 +73,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         ),
                         varselSvarfrist = LocalDate.now().plusDays(14),
                     )
+                    val json = objectMapper.writeValueAsString(forhandsvarselRequestDTO)
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -83,7 +84,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         response.status() shouldBeEqualTo HttpStatusCode.Created
                         val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo forhandsvarselRequestDTO.personident
-                        responseDTO.vurderingType shouldBeEqualTo forhandsvarselRequestDTO.vurderingType
+                        responseDTO.vurderingType shouldBeEqualTo VurderingType.FORHANDSVARSEL
                         responseDTO.begrunnelse shouldBeEqualTo forhandsvarselRequestDTO.begrunnelse
                         responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo forhandsvarselRequestDTO.document
@@ -97,16 +98,15 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 }
 
                 it("Successfully creates an STANS vurdering with pdf") {
-                    val stansVurdering = NewVurderingRequestDTO(
+                    val stansVurdering = NewVurderingRequestDTO.Stans(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        vurderingType = VurderingType.STANS,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
                             fritekst = begrunnelse,
                             header = "Stans"
                         ),
-                        varselSvarfrist = null,
                     )
+                    val json = objectMapper.writeValueAsString(stansVurdering)
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -117,7 +117,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         response.status() shouldBeEqualTo HttpStatusCode.Created
                         val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo stansVurdering.personident
-                        responseDTO.vurderingType shouldBeEqualTo stansVurdering.vurderingType
+                        responseDTO.vurderingType shouldBeEqualTo VurderingType.STANS
                         responseDTO.begrunnelse shouldBeEqualTo stansVurdering.begrunnelse
                         responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo stansVurdering.document
@@ -131,15 +131,13 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 }
 
                 it("Successfully creates an OPPFYLT vurdering with pdf") {
-                    val oppfyltVurdering = NewVurderingRequestDTO(
+                    val oppfyltVurdering = NewVurderingRequestDTO.Oppfylt(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        vurderingType = VurderingType.OPPFYLT,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
                             fritekst = begrunnelse,
                             header = "Oppfylt"
                         ),
-                        varselSvarfrist = null,
                     )
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
@@ -151,7 +149,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         response.status() shouldBeEqualTo HttpStatusCode.Created
                         val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo oppfyltVurdering.personident
-                        responseDTO.vurderingType shouldBeEqualTo oppfyltVurdering.vurderingType
+                        responseDTO.vurderingType shouldBeEqualTo VurderingType.OPPFYLT
                         responseDTO.begrunnelse shouldBeEqualTo oppfyltVurdering.begrunnelse
                         responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo oppfyltVurdering.document
@@ -165,15 +163,13 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 }
 
                 it("Successfully creates an UNNTAK vurdering with pdf") {
-                    val unntakVurdering = NewVurderingRequestDTO(
+                    val unntakVurdering = NewVurderingRequestDTO.Unntak(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        vurderingType = VurderingType.UNNTAK,
                         begrunnelse = "Unntak fordi...",
                         document = generateDocumentComponent(
                             fritekst = begrunnelse,
                             header = "Unntak"
                         ),
-                        varselSvarfrist = null,
                     )
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
@@ -185,7 +181,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         response.status() shouldBeEqualTo HttpStatusCode.Created
                         val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo unntakVurdering.personident
-                        responseDTO.vurderingType shouldBeEqualTo unntakVurdering.vurderingType
+                        responseDTO.vurderingType shouldBeEqualTo VurderingType.UNNTAK
                         responseDTO.begrunnelse shouldBeEqualTo unntakVurdering.begrunnelse
                         responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo unntakVurdering.document
@@ -199,15 +195,13 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 }
 
                 it("Successfully creates an IKKE AKTUELL vurdering with pdf") {
-                    val ikkeAktuellVurdering = NewVurderingRequestDTO(
+                    val ikkeAktuellVurdering = NewVurderingRequestDTO.IkkeAktuell(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        vurderingType = VurderingType.IKKE_AKTUELL,
                         begrunnelse = "Fin begrunnelse",
                         document = generateDocumentComponent(
                             fritekst = begrunnelse,
                             header = "Oppfylt"
                         ),
-                        varselSvarfrist = null,
                     )
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
@@ -219,7 +213,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         response.status() shouldBeEqualTo HttpStatusCode.Created
                         val responseDTO = objectMapper.readValue<VurderingResponseDTO>(response.content!!)
                         responseDTO.personident shouldBeEqualTo ikkeAktuellVurdering.personident
-                        responseDTO.vurderingType shouldBeEqualTo ikkeAktuellVurdering.vurderingType
+                        responseDTO.vurderingType shouldBeEqualTo VurderingType.IKKE_AKTUELL
                         responseDTO.begrunnelse shouldBeEqualTo ikkeAktuellVurdering.begrunnelse
                         responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo ikkeAktuellVurdering.document
@@ -233,9 +227,8 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                 }
 
                 it("Fails to create a new forhandsvarsel when document is missing") {
-                    val forhandsvarselRequestDTO = NewVurderingRequestDTO(
+                    val forhandsvarselRequestDTO = NewVurderingRequestDTO.Forhandsvarsel(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
-                        vurderingType = VurderingType.FORHANDSVARSEL,
                         begrunnelse = "Fin begrunnelse",
                         document = emptyList(),
                         varselSvarfrist = LocalDate.now().plusDays(14),
@@ -255,9 +248,8 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                     testMissingToken("$urlVurderinger/vurderinger", HttpMethod.Post)
                 }
                 it("returns status Forbidden if denied access to person") {
-                    val forhandsvarselRequestDTO = NewVurderingRequestDTO(
+                    val forhandsvarselRequestDTO = NewVurderingRequestDTO.Forhandsvarsel(
                         personident = ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS.value,
-                        vurderingType = VurderingType.FORHANDSVARSEL,
                         begrunnelse = "Fin begrunnelse",
                         document = emptyList(),
                         varselSvarfrist = LocalDate.now().plusDays(14),

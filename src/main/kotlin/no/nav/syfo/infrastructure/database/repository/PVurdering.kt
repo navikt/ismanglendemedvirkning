@@ -6,6 +6,7 @@ import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.VurderingType
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -18,6 +19,7 @@ data class PVurdering(
     val veilederident: Veilederident,
     val type: VurderingType,
     val begrunnelse: String,
+    val stansdato: LocalDate?,
     val document: List<DocumentComponent>,
     val journalpostId: JournalpostId?,
     val publishedAt: OffsetDateTime?,
@@ -50,6 +52,7 @@ data class PVurdering(
                 veilederident = veilederident,
                 createdAt = createdAt,
                 begrunnelse = begrunnelse,
+                stansdato = stansdato!!,
                 document = document,
                 journalpostId = journalpostId,
             )

@@ -31,6 +31,7 @@ sealed class NewVurderingRequestDTO {
         override val personident: String,
         override val begrunnelse: String,
         override val document: List<DocumentComponent>,
+        val stansdato: LocalDate,
     ) : NewVurderingRequestDTO()
 
     @JsonTypeName("IKKE_AKTUELL")

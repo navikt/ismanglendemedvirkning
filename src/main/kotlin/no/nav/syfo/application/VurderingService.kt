@@ -40,6 +40,7 @@ class VurderingService(
                     personident = Personident(newVurdering.personident),
                     veilederident = veilederident,
                     begrunnelse = newVurdering.begrunnelse,
+                    stansdato = newVurdering.stansdato,
                     document = newVurdering.document,
                 )
             is NewVurderingRequestDTO.IkkeAktuell ->

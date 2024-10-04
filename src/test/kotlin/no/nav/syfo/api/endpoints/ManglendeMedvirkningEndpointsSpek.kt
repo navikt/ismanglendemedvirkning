@@ -101,12 +101,12 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                     val stansVurdering = NewVurderingRequestDTO.Stans(
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
                         begrunnelse = "Fin begrunnelse",
+                        stansdato = LocalDate.now().plusDays(5),
                         document = generateDocumentComponent(
                             fritekst = begrunnelse,
                             header = "Stans"
                         ),
                     )
-                    val json = objectMapper.writeValueAsString(stansVurdering)
                     with(
                         handleRequest(HttpMethod.Post, "$urlVurderinger/vurderinger") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -119,6 +119,7 @@ object ManglendeMedvirkningEndpointsSpek : Spek({
                         responseDTO.personident shouldBeEqualTo stansVurdering.personident
                         responseDTO.vurderingType shouldBeEqualTo VurderingType.STANS
                         responseDTO.begrunnelse shouldBeEqualTo stansVurdering.begrunnelse
+                        responseDTO.stansdato shouldBeEqualTo stansVurdering.stansdato
                         responseDTO.veilederident shouldBeEqualTo VEILEDER_IDENT.value
                         responseDTO.document shouldBeEqualTo stansVurdering.document
                         responseDTO.varsel?.svarfrist shouldBeEqualTo null

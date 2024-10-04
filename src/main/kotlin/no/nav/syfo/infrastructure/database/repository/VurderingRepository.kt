@@ -135,6 +135,10 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             it.setObject(8, mapper.writeValueAsString(vurdering.document))
             it.setNull(9, Types.VARCHAR)
             it.setNull(10, Types.TIMESTAMP_WITH_TIMEZONE)
+            when (vurdering) {
+                is Vurdering.Stans -> it.setDate(11, Date.valueOf(vurdering.stansdato))
+                else -> it.setNull(11, Types.DATE)
+            }
             it.executeQuery().toList { toPVurdering() }.firstOrNull()
         }
         if (pVurdering == null) {
@@ -196,8 +200,9 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
                 begrunnelse,
                 document,
                 journalpost_id,
-                published_at
-            ) values (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?)
+                published_at,
+                stansdato
+            ) values (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?, ?)
             RETURNING *
             """
 
@@ -286,6 +291,7 @@ internal fun ResultSet.toPVurdering(): PVurdering =
         veilederident = Veilederident(getString("veilederident")),
         type = VurderingType.valueOf(getString("type")),
         begrunnelse = getString("begrunnelse"),
+        stansdato = getDate("stansdato")?.toLocalDate(),
         document = configuredJacksonMapper().readValue(
             getString("document"),
             object : TypeReference<List<DocumentComponent>>() {}

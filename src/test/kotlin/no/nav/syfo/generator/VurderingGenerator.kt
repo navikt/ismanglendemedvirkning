@@ -51,6 +51,7 @@ fun generateVurdering(
         personident = personident,
         veilederident = UserConstants.VEILEDER_IDENT,
         begrunnelse = begrunnelse,
+        stansdato = LocalDate.now().plusDays(5),
         document = document,
         journalpostId = null,
     )

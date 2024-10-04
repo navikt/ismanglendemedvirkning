@@ -45,6 +45,7 @@ sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
         override val begrunnelse: String,
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
+        val stansdato: LocalDate,
     ) : Vurdering(VurderingType.STANS)
 
     data class IkkeAktuell(
@@ -132,6 +133,7 @@ sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
             personident: Personident,
             veilederident: Veilederident,
             begrunnelse: String,
+            stansdato: LocalDate,
             document: List<DocumentComponent>,
         ) = Stans(
             uuid = UUID.randomUUID(),
@@ -139,6 +141,7 @@ sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
             veilederident = veilederident,
             createdAt = OffsetDateTime.now(),
             begrunnelse = begrunnelse,
+            stansdato = stansdato,
             document = document,
             journalpostId = null,
         )

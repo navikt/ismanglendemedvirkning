@@ -44,6 +44,32 @@ class VurderingRepositorySpek : Spek({
                     savedVurdering.journalpostId shouldBeEqualTo vurdering.journalpostId
                 }
 
+                it("saves a vurdering of type STANS") {
+                    val vurdering = Vurdering.Stans(
+                        uuid = UUID.randomUUID(),
+                        personident = ARBEIDSTAKER_PERSONIDENT,
+                        veilederident = VEILEDER_IDENT,
+                        createdAt = nowUTC(),
+                        begrunnelse = "Begrunnelse",
+                        stansdato = nowUTC().toLocalDate(),
+                        document = emptyList(),
+                        journalpostId = null,
+                    )
+                    val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
+                    when (savedVurdering) {
+                        is Vurdering.Stans -> {
+                            savedVurdering.personident shouldBeEqualTo vurdering.personident
+                            savedVurdering.veilederident shouldBeEqualTo vurdering.veilederident
+                            savedVurdering.begrunnelse shouldBeEqualTo vurdering.begrunnelse
+                            savedVurdering.stansdato shouldBeEqualTo vurdering.stansdato
+                            savedVurdering.document shouldBeEqualTo vurdering.document
+                            savedVurdering.journalpostId shouldBeEqualTo vurdering.journalpostId
+                        }
+                        else ->
+                            throw IllegalStateException("Expected Vurdering.Stans, got $savedVurdering")
+                    }
+                }
+
                 it("saves a vurdering with a varsel") {
                     val now = nowUTC()
                     val vurdering = Vurdering.Forhandsvarsel(

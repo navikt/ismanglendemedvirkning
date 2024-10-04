@@ -13,6 +13,7 @@ data class VurderingResponseDTO private constructor(
     val vurderingType: VurderingType,
     val veilederident: String,
     val begrunnelse: String,
+    val stansdato: LocalDate?,
     val document: List<DocumentComponent>,
     val varsel: VarselDTO?,
 ) {
@@ -24,6 +25,7 @@ data class VurderingResponseDTO private constructor(
             vurderingType = vurdering.vurderingType,
             veilederident = vurdering.veilederident.value,
             begrunnelse = vurdering.begrunnelse,
+            stansdato = if (vurdering is Vurdering.Stans) vurdering.stansdato else null,
             document = vurdering.document,
             varsel = if (vurdering is Vurdering.Forhandsvarsel) VarselDTO.fromVarsel(vurdering.varsel) else null,
         )

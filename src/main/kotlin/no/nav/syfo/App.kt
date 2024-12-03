@@ -81,66 +81,65 @@ fun main() {
     lateinit var varselService: VarselService
 
     val applicationEngineEnvironment =
-        applicationEngineEnvironment {
+        applicationEnvironment {
             log = logger
             config = HoconApplicationConfig(ConfigFactory.load())
+        }
+    val server = embeddedServer(
+        Netty,
+        environment = applicationEngineEnvironment,
+        configure = {
             connector {
                 port = applicationPort
             }
-            module {
-                databaseModule(
-                    databaseEnvironment = environment.database,
-                )
+            connectionGroupSize = 8
+            workerGroupSize = 8
+            callGroupSize = 16
+        },
+        module = {
+            databaseModule(
+                databaseEnvironment = environment.database,
+            )
 
-                val vurderingRepository = VurderingRepository(
-                    database = applicationDatabase,
-                )
-                val varselRepository = VarselRepository(database = applicationDatabase)
+            val vurderingRepository = VurderingRepository(
+                database = applicationDatabase,
+            )
+            val varselRepository = VarselRepository(database = applicationDatabase)
 
-                vurderingService = VurderingService(
-                    journalforingService = journalforingService,
-                    vurderingRepository = vurderingRepository,
-                    vurderingProducer = vurderingProducer,
-                    vurderingPdfService = vurderingPdfService,
-                )
-                varselService = VarselService(
-                    varselRepository = varselRepository,
-                    varselProducer = VarselProducer(
-                        arbeidstakerForhandsvarselProducer = arbeidstakerForhandsvarselProducer,
-                    ),
-                )
+            vurderingService = VurderingService(
+                journalforingService = journalforingService,
+                vurderingRepository = vurderingRepository,
+                vurderingProducer = vurderingProducer,
+                vurderingPdfService = vurderingPdfService,
+            )
+            varselService = VarselService(
+                varselRepository = varselRepository,
+                varselProducer = VarselProducer(
+                    arbeidstakerForhandsvarselProducer = arbeidstakerForhandsvarselProducer,
+                ),
+            )
 
-                apiModule(
+            apiModule(
+                applicationState = applicationState,
+                environment = environment,
+                wellKnownInternalAzureAD = wellKnownInternalAzureAD,
+                database = applicationDatabase,
+                veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+                vurderingService = vurderingService,
+            )
+            monitor.subscribe(ApplicationStarted) {
+                applicationState.ready = true
+                logger.info("Application is ready, running Java VM ${Runtime.version()}")
+
+                launchCronjobs(
                     applicationState = applicationState,
                     environment = environment,
-                    wellKnownInternalAzureAD = wellKnownInternalAzureAD,
-                    database = applicationDatabase,
-                    veilederTilgangskontrollClient = veilederTilgangskontrollClient,
                     vurderingService = vurderingService,
+                    varselService = varselService,
                 )
             }
         }
-
-    applicationEngineEnvironment.monitor.subscribe(ApplicationStarted) {
-        applicationState.ready = true
-        logger.info("Application is ready, running Java VM ${Runtime.version()}")
-
-        launchCronjobs(
-            applicationState = applicationState,
-            environment = environment,
-            vurderingService = vurderingService,
-            varselService = varselService,
-        )
-    }
-
-    val server = embeddedServer(
-        factory = Netty,
-        environment = applicationEngineEnvironment
-    ) {
-        connectionGroupSize = 8
-        workerGroupSize = 8
-        callGroupSize = 16
-    }
+    )
 
     Runtime.getRuntime().addShutdownHook(
         Thread { server.stop(10, 10, TimeUnit.SECONDS) }

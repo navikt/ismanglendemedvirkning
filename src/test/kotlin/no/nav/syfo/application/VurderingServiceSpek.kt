@@ -30,11 +30,11 @@ import org.amshove.kluent.shouldNotBeNull
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
-import org.junit.Assert.fail
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.LocalDate
 import java.util.concurrent.Future
+import kotlin.test.fail
 
 class VurderingServiceSpek : Spek({
     describe(VurderingService::class.java.simpleName) {

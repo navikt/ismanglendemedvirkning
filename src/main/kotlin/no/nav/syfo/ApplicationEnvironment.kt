@@ -51,6 +51,7 @@ data class Environment(
         aivenSecurityProtocol = "SSL",
         aivenTruststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
     ),
+    val journalforingCronjobEnabled: Boolean = getEnvVar("JOURNALFORING_CRONJOB_ENABLED").toBoolean(),
 )
 
 fun getEnvVar(

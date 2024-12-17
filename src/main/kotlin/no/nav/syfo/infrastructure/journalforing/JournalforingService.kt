@@ -33,7 +33,10 @@ class JournalforingService(
             if (journalforingRetryEnabeled) {
                 throw exc
             } else {
-                log.warn("Journalforing failed, skipping retry: ", exc)
+                log.error("Journalføring failed, skipping retry (should only happen in dev-gcp)", exc)
+                // Defaulting'en til DEFAULT_FAILED_JP_ID skal bare forekomme i dev-gcp:
+                // Har dette fordi vi ellers spammer ned dokarkiv med forsøk på å journalføre
+                // på personer som mangler aktør-id.
                 DEFAULT_FAILED_JP_ID
             }
         }

@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.Serializer
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -46,6 +47,7 @@ data class VurderingRecord(
     val createdAt: OffsetDateTime,
     val begrunnelse: String,
     val varsel: Varsel?,
+    val stansDato: LocalDate?,
     val vurderingType: VurderingTypeDTO,
 ) {
     companion object {
@@ -58,6 +60,10 @@ data class VurderingRecord(
                 begrunnelse = vurdering.begrunnelse,
                 varsel = when (vurdering) {
                     is Vurdering.Forhandsvarsel -> vurdering.varsel
+                    else -> null
+                },
+                stansDato = when (vurdering) {
+                    is Vurdering.Stans -> vurdering.stansdato
                     else -> null
                 },
                 vurderingType = VurderingTypeDTO(

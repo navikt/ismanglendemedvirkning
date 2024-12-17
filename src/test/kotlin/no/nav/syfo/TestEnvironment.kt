@@ -47,7 +47,7 @@ fun testEnvironment() = Environment(
         ),
     ),
     electorPath = "electorPath",
-    journalforingRetryEnabled = true,
+    isJournalforingRetryEnabled = true,
 )
 
 fun testAppState() = ApplicationState(

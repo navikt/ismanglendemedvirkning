@@ -7,12 +7,10 @@ import no.nav.syfo.infrastructure.clients.dokarkiv.dto.*
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
 import org.slf4j.LoggerFactory
 
-const val DEFAULT_FAILED_JP_ID = 0
-
 class JournalforingService(
     private val dokarkivClient: DokarkivClient,
     private val pdlClient: PdlClient,
-    private val journalforingRetryEnabeled: Boolean,
+    private val isJournalforingRetryEnabeled: Boolean,
 ) : IJournalforingService {
     override suspend fun journalfor(
         personident: Personident,
@@ -30,7 +28,7 @@ class JournalforingService(
         return try {
             dokarkivClient.journalfor(journalpostRequest).journalpostId
         } catch (exc: Exception) {
-            if (journalforingRetryEnabeled) {
+            if (isJournalforingRetryEnabeled) {
                 throw exc
             } else {
                 log.error("Journalføring failed, skipping retry (should only happen in dev-gcp)", exc)
@@ -91,6 +89,7 @@ class JournalforingService(
     }
 
     companion object {
+        const val DEFAULT_FAILED_JP_ID = 0
         private val log = LoggerFactory.getLogger(JournalforingService::class.java)
     }
 }

@@ -70,7 +70,7 @@ fun main() {
     val journalforingService = JournalforingService(
         dokarkivClient = dokarkivClient,
         pdlClient = pdlClient,
-        isJournalforingRetryEnabeled = environment.isJournalforingRetryEnabled,
+        isJournalforingRetryEnabled = environment.isJournalforingRetryEnabled,
     )
 
     val vurderingPdfService = VurderingPdfService(

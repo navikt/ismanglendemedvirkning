@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 class JournalforingService(
     private val dokarkivClient: DokarkivClient,
     private val pdlClient: PdlClient,
-    private val isJournalforingRetryEnabeled: Boolean,
+    private val isJournalforingRetryEnabled: Boolean,
 ) : IJournalforingService {
     override suspend fun journalfor(
         personident: Personident,
@@ -28,7 +28,7 @@ class JournalforingService(
         return try {
             dokarkivClient.journalfor(journalpostRequest).journalpostId
         } catch (exc: Exception) {
-            if (isJournalforingRetryEnabeled) {
+            if (isJournalforingRetryEnabled) {
                 throw exc
             } else {
                 log.error("Journalføring failed, skipping retry (should only happen in dev-gcp)", exc)

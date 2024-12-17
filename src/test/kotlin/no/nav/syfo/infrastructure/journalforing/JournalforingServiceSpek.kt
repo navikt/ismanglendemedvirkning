@@ -30,7 +30,7 @@ object JournalforingServiceSpek : Spek({
         val journalforingService = JournalforingService(
             dokarkivClient = dokarkivMock,
             pdlClient = externalMockEnvironment.pdlClient,
-            isJournalforingRetryEnabeled = externalMockEnvironment.environment.isJournalforingRetryEnabled,
+            isJournalforingRetryEnabled = externalMockEnvironment.environment.isJournalforingRetryEnabled,
         )
 
         beforeEachTest {

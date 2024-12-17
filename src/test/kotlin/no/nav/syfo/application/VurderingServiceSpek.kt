@@ -11,6 +11,7 @@ import no.nav.syfo.UserConstants.PDF_VURDERING
 import no.nav.syfo.UserConstants.VEILEDER_IDENT
 import no.nav.syfo.application.model.NewVurderingRequestDTO
 import no.nav.syfo.domain.JournalpostId
+import no.nav.syfo.domain.Vurdering
 import no.nav.syfo.domain.Vurdering.Forhandsvarsel
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateVurdering
@@ -136,6 +137,36 @@ class VurderingServiceSpek : Spek({
                 when (savedVurdering) {
                     is Forhandsvarsel -> vurderingRecord.varsel?.svarfrist shouldBeEqualTo savedVurdering.varsel.svarfrist
                     else -> fail("Expected published record svarfrist to equal saved vurdering svarfrist")
+                }
+            }
+
+            it("Publiserer stans-vurdering med stansdato på kafka") {
+                coEvery { mockVurderingProducer.send(any()) } returns mockk<Future<RecordMetadata>>(relaxed = true)
+
+                val stansVurdering = runBlocking {
+                    vurderingService.createNewVurdering(
+                        veilederident = VEILEDER_IDENT,
+                        newVurdering = NewVurderingRequestDTO.Stans(
+                            personident = ARBEIDSTAKER_PERSONIDENT.value,
+                            begrunnelse = "Begrunnelse",
+                            document = emptyList(),
+                            stansdato = LocalDate.now().plusDays(14),
+                        ),
+                        callId = "callId",
+                    )
+                }
+
+                val producerRecordSlot = slot<ProducerRecord<String, VurderingRecord>>()
+                verifyOrder {
+                    mockVurderingProducer.send(capture(producerRecordSlot))
+                }
+
+                val vurderingRecord = producerRecordSlot.captured.value()
+
+                vurderingRecord.uuid shouldBeEqualTo stansVurdering.uuid
+                when (stansVurdering) {
+                    is Vurdering.Stans -> vurderingRecord.stansDato shouldBeEqualTo stansVurdering.stansdato
+                    else -> fail("Expected published record stansDato to equal saved vurdering stansdato")
                 }
             }
         }

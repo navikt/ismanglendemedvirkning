@@ -51,6 +51,7 @@ data class Environment(
         aivenSecurityProtocol = "SSL",
         aivenTruststoreLocation = getEnvVar("KAFKA_TRUSTSTORE_PATH"),
     ),
+    val isJournalforingRetryEnabled: Boolean = getEnvVar("JOURNALFORING_RETRY_ENABLED").toBoolean(),
 )
 
 fun getEnvVar(

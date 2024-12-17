@@ -46,6 +46,7 @@ class VurderingServiceSpek : Spek({
         val journalforingService = JournalforingService(
             dokarkivClient = externalMockEnvironment.dokarkivClient,
             pdlClient = externalMockEnvironment.pdlClient,
+            journalforingRetryEnabeled = externalMockEnvironment.environment.journalforingRetryEnabled,
         )
 
         val mockVurderingProducer = mockk<KafkaProducer<String, VurderingRecord>>(relaxed = true)

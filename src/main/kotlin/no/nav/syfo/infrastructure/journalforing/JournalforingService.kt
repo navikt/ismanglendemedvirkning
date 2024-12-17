@@ -5,10 +5,14 @@ import no.nav.syfo.domain.*
 import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
 import no.nav.syfo.infrastructure.clients.dokarkiv.dto.*
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
+import org.slf4j.LoggerFactory
+
+const val DEFAULT_FAILED_JP_ID = 0
 
 class JournalforingService(
     private val dokarkivClient: DokarkivClient,
     private val pdlClient: PdlClient,
+    private val journalforingRetryEnabeled: Boolean,
 ) : IJournalforingService {
     override suspend fun journalfor(
         personident: Personident,
@@ -23,7 +27,16 @@ class JournalforingService(
             vurdering = vurdering,
         )
 
-        return dokarkivClient.journalfor(journalpostRequest).journalpostId
+        return try {
+            dokarkivClient.journalfor(journalpostRequest).journalpostId
+        } catch (exc: Exception) {
+            if (journalforingRetryEnabeled) {
+                throw exc
+            } else {
+                log.warn("Journalforing failed, skipping retry: ", exc)
+                DEFAULT_FAILED_JP_ID
+            }
+        }
     }
 
     private fun createJournalpostRequest(
@@ -72,6 +85,10 @@ class JournalforingService(
             dokumenter = dokumenter,
             eksternReferanseId = vurdering.uuid.toString(),
         )
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(JournalforingService::class.java)
     }
 }
 

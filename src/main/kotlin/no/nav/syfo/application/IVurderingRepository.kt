@@ -19,4 +19,6 @@ interface IVurderingRepository {
     fun getVurderinger(personident: Personident): List<Vurdering>
 
     fun getLatestVurderingForPersoner(personidenter: List<Personident>): Map<Personident, Vurdering>
+
+    fun updatePersonident(nyPersonident: Personident, vurderinger: List<Vurdering>)
 }

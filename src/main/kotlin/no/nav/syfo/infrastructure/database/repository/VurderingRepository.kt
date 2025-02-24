@@ -123,6 +123,20 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
             }
         }
 
+    override fun updatePersonident(nyPersonident: Personident, vurderinger: List<Vurdering>) = database.connection.use { connection ->
+        connection.prepareStatement(UPDATE_PERSONIDENT).use {
+            vurderinger.forEach { vurdering ->
+                it.setString(1, nyPersonident.value)
+                it.setString(2, vurdering.uuid.toString())
+                val updated = it.executeUpdate()
+                if (updated != 1) {
+                    throw SQLException("Expected a single row to be updated, got update count $updated")
+                }
+            }
+        }
+        connection.commit()
+    }
+
     private fun Connection.saveVurdering(vurdering: Vurdering): PVurdering {
         val pVurdering = this.prepareStatement(INSERT_INTO_VURDERING).use {
             it.setString(1, vurdering.uuid.toString())
@@ -243,6 +257,11 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
         private const val UPDATE_PUBLISHED_AT =
             """
                 UPDATE VURDERING SET updated_at=?, published_at=? WHERE uuid=?
+            """
+
+        private const val UPDATE_PERSONIDENT =
+            """
+                UPDATE VURDERING SET personident=? WHERE uuid=?
             """
 
         private const val GET_VURDERINGER =

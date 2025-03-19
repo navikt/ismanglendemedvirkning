@@ -12,7 +12,6 @@ fun generateVurdering(
     document: List<DocumentComponent> = generateDocumentComponent(begrunnelse),
     type: VurderingType,
     createdAt: OffsetDateTime = OffsetDateTime.now(),
-    svarfrist: LocalDate = LocalDate.now().plusWeeks(3),
 ) = when (type) {
     VurderingType.FORHANDSVARSEL -> Vurdering.Forhandsvarsel(
         uuid = UUID.randomUUID(),
@@ -25,7 +24,7 @@ fun generateVurdering(
         varsel = Varsel(
             uuid = UUID.randomUUID(),
             createdAt = OffsetDateTime.now(),
-            svarfrist = svarfrist,
+            svarfrist = LocalDate.now().plusWeeks(3),
         ),
     )
     VurderingType.OPPFYLT -> Vurdering.Oppfylt(

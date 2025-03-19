@@ -51,6 +51,7 @@ fun testEnvironment() = Environment(
     ),
     electorPath = "electorPath",
     isJournalforingRetryEnabled = true,
+    republishForhandsvarselWithAdditionalInfoCronjobEnabled = true,
 )
 
 fun testAppState() = ApplicationState(

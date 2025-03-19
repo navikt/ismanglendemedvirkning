@@ -47,9 +47,13 @@ fun launchCronjobs(
     }
 }
 
-// TOOD: Add uuids to generate new forhandsvarsel for
-// Tester med to uuider fra dev, den ene har fristen gått ut, den andre ikke
 val UUIDS = listOf(
-    "5d3c80be-7156-43a9-9fec-4e891f79f18f",
-    "78ed3c4f-c702-4aaa-b836-db4d4a72f22d"
+    "b39fa390-fdd9-4750-9536-9834f709b851",
+    "d3c5afd9-dd42-4c54-adef-c0b44e24cde9",
+    "efbe9a3f-943a-4ca0-bbf2-51e8b844a29b",
+    "4ad576d4-b69f-43c4-a76d-280101b6953c",
+    "43df8eab-bd49-4f1c-ae8c-6106b21daa7a",
+    "eaaa137a-5577-4658-89d7-d266a9846479",
+    "662e3e8c-b355-4aca-99cc-9c62e71ccbe5",
+    "5465bd48-82d4-418d-b99e-0afecf9c7528"
 )

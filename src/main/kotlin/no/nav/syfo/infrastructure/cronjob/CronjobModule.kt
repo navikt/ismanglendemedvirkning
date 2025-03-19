@@ -30,6 +30,14 @@ fun launchCronjobs(
     )
     cronjobs.add(journalforVurderingerCronjob)
 
+    if (environment.republishForhandsvarselWithAdditionalInfoCronjobEnabled) {
+        val republishForhandsvarselWithAdditionalInfoCronjob = RepublishForhandsvarselWithAdditionalInfoCronjob(
+            vurderingService = vurderingService,
+            uuids = UUIDS,
+        )
+        cronjobs.add(republishForhandsvarselWithAdditionalInfoCronjob)
+    }
+
     cronjobs.forEach {
         launchBackgroundTask(
             applicationState = applicationState,
@@ -38,3 +46,10 @@ fun launchCronjobs(
         }
     }
 }
+
+// TOOD: Add uuids to generate new forhandsvarsel for
+// Tester med to uuider fra dev, den ene har fristen gått ut, den andre ikke
+val UUIDS = listOf(
+    "5d3c80be-7156-43a9-9fec-4e891f79f18f",
+    "78ed3c4f-c702-4aaa-b836-db4d4a72f22d"
+)

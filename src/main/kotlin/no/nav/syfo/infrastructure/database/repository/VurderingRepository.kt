@@ -137,18 +137,6 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
         connection.commit()
     }
 
-    override fun getVurdering(uuid: UUID): Vurdering? =
-        database.connection.use { connection ->
-            connection.prepareStatement(GET_VURDERING_BY_UUID).use {
-                it.setString(1, uuid.toString())
-                it.executeQuery().toList { toPVurdering() }
-            }.map {
-                it.toManglendeMedvirkningVurdering(
-                    pVarsel = connection.getVarselForVurdering(it)
-                )
-            }.firstOrNull()
-        }
-
     private fun Connection.saveVurdering(vurdering: Vurdering): PVurdering {
         val pVurdering = this.prepareStatement(INSERT_INTO_VURDERING).use {
             it.setString(1, vurdering.uuid.toString())
@@ -308,11 +296,6 @@ class VurderingRepository(private val database: DatabaseInterface) : IVurderingR
         private const val GET_VARSEL_FOR_VURDERING =
             """
                 SELECT * FROM VARSEL WHERE vurdering_id = ?
-            """
-
-        private const val GET_VURDERING_BY_UUID =
-            """
-                SELECT * FROM VURDERING WHERE uuid=?
             """
     }
 }

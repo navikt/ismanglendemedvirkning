@@ -6,7 +6,6 @@ import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.Vurdering
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class VurderingService(
     private val journalforingService: IJournalforingService,
@@ -106,8 +105,6 @@ class VurderingService(
         personidenter: List<Personident>,
     ): Map<Personident, Vurdering> =
         vurderingRepository.getLatestVurderingForPersoner(personidenter)
-
-    fun getVurdering(uuid: UUID): Vurdering? = vurderingRepository.getVurdering(uuid)
 
     companion object {
         private val log = LoggerFactory.getLogger(VurderingService::class.java)

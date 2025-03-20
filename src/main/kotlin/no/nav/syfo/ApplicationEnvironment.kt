@@ -55,7 +55,6 @@ data class Environment(
         aivenRegistryPassword = getEnvVar("KAFKA_SCHEMA_REGISTRY_PASSWORD"),
     ),
     val isJournalforingRetryEnabled: Boolean = getEnvVar("JOURNALFORING_RETRY_ENABLED").toBoolean(),
-    val republishForhandsvarselWithAdditionalInfoCronjobEnabled: Boolean = getEnvVar("REPUBLISH_FORHANDSVARSEL_WITH_ADDITIONAL_INFO_CRONJOB_ENABLED").toBoolean(),
 )
 
 fun getEnvVar(

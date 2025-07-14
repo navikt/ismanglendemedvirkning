@@ -15,9 +15,8 @@ Applikasjon for å lagre vurderinger i henhold til §8-8 i folketrygdloven rundt
 
 ##### Test Libraries:
 
-* Kluent
 * Mockk
-* Spek
+* JUnit
 
 #### Requirements
 

@@ -3,7 +3,7 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 group = "no.nav.syfo"
 version = "0.0.1"
 
-val confluentVersion = "7.9.0"
+val confluentVersion = "8.0.0"
 val flywayVersion = "11.6.0"
 val hikariVersion = "6.3.0"
 val postgresVersion = "42.7.5"

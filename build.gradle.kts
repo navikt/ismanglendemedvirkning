@@ -20,7 +20,7 @@ val nimbusJoseJwtVersion = "10.4.2"
 
 plugins {
     kotlin("jvm") version "2.2.10"
-    id("com.gradleup.shadow") version "8.3.6"
+    id("com.gradleup.shadow") version "9.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.adarshr.test-logger") version "4.0.0"
 }

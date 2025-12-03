@@ -30,10 +30,10 @@ sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
             private val FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_SHORTEST = 21L
             private val FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_LONGEST = 42L
 
-            fun hasValidSvarfrist(svarfrist: LocalDate?): Boolean {
+            fun hasValidSvarfrist(svarfrist: LocalDate): Boolean {
                 val allowedSvarfristShortest = LocalDate.now().plusDays(FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_SHORTEST)
                 val allowedSvarfristLongest = LocalDate.now().plusDays(FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_LONGEST)
-                return !(svarfrist == null || svarfrist.isBefore(allowedSvarfristShortest) || svarfrist.isAfter(allowedSvarfristLongest))
+                return !(svarfrist.isBefore(allowedSvarfristShortest) || svarfrist.isAfter(allowedSvarfristLongest))
             }
         }
     }

@@ -22,8 +22,7 @@ class VurderingService(
     ): Vurdering {
         val newVurdering = when (newVurdering) {
             is NewVurderingRequestDTO.Forhandsvarsel -> {
-                val svarfrist = newVurdering.varselSvarfrist
-                if (!Vurdering.Forhandsvarsel.hasValidSvarfrist(svarfrist)) {
+                if (!Vurdering.Forhandsvarsel.hasValidSvarfrist(newVurdering.varselSvarfrist)) {
                     throw IllegalArgumentException("Forhandsvarsel has invalid svarfrist")
                 }
                 Vurdering.createForhandsvarsel(

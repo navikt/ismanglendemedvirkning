@@ -112,9 +112,6 @@ class VurderingService(
         vurderingRepository.getLatestVurderingForPersoner(personidenter)
 
     companion object {
-        val FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_SHORTEST = 21L
-        val FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_LONGEST = 42L
-
         private val log = LoggerFactory.getLogger(VurderingService::class.java)
     }
 }

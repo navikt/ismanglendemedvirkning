@@ -6,6 +6,7 @@ import no.nav.syfo.domain.Personident
 import no.nav.syfo.domain.Veilederident
 import no.nav.syfo.domain.Vurdering
 import org.slf4j.LoggerFactory
+import java.lang.IllegalArgumentException
 
 class VurderingService(
     private val journalforingService: IJournalforingService,
@@ -20,7 +21,10 @@ class VurderingService(
         callId: String,
     ): Vurdering {
         val newVurdering = when (newVurdering) {
-            is NewVurderingRequestDTO.Forhandsvarsel ->
+            is NewVurderingRequestDTO.Forhandsvarsel -> {
+                if (!Vurdering.Forhandsvarsel.hasValidSvarfrist(newVurdering.varselSvarfrist)) {
+                    throw IllegalArgumentException("Forhandsvarsel has invalid svarfrist")
+                }
                 Vurdering.createForhandsvarsel(
                     personident = Personident(newVurdering.personident),
                     veilederident = veilederident,
@@ -28,6 +32,7 @@ class VurderingService(
                     document = newVurdering.document,
                     varselSvarfrist = newVurdering.varselSvarfrist,
                 )
+            }
             is NewVurderingRequestDTO.Oppfylt ->
                 Vurdering.createOppfylt(
                     personident = Personident(newVurdering.personident),

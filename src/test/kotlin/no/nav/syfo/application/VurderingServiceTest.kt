@@ -35,6 +35,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
 import org.junit.jupiter.api.assertNotNull
+import org.junit.jupiter.api.assertThrows
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import java.util.concurrent.Future
 
@@ -88,7 +90,7 @@ class VurderingServiceTest {
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
                         begrunnelse = "Begrunnelse",
                         document = emptyList(),
-                        varselSvarfrist = LocalDate.now().plusDays(14),
+                        varselSvarfrist = LocalDate.now().plusDays(21),
                     ),
                     callId = "callId",
                 )
@@ -100,8 +102,44 @@ class VurderingServiceTest {
             assertEquals("Begrunnelse", savedVurdering.begrunnelse)
             assertEquals(emptyList<DocumentComponent>(), savedVurdering.document)
             assertInstanceOf<Forhandsvarsel>(savedVurdering)
-            assertEquals(LocalDate.now().plusDays(14), savedVurdering.varsel.svarfrist)
+            assertEquals(LocalDate.now().plusDays(21), savedVurdering.varsel.svarfrist)
             assertNotNull(database.getVurderingPdf(savedVurdering.uuid))
+        }
+
+        @Test
+        fun `Lagrer ikke forhåndsvarsel med for kort svarfrist`() {
+            assertThrows<IllegalArgumentException>() {
+                runBlocking {
+                    vurderingService.createNewVurdering(
+                        veilederident = VEILEDER_IDENT,
+                        newVurdering = NewVurderingRequestDTO.Forhandsvarsel(
+                            personident = ARBEIDSTAKER_PERSONIDENT.value,
+                            begrunnelse = "Begrunnelse",
+                            document = emptyList(),
+                            varselSvarfrist = LocalDate.now().plusDays(20),
+                        ),
+                        callId = "callId",
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun `Lagrer ikke forhåndsvarsel med for lang svarfrist`() {
+            assertThrows<IllegalArgumentException>() {
+                runBlocking {
+                    vurderingService.createNewVurdering(
+                        veilederident = VEILEDER_IDENT,
+                        newVurdering = NewVurderingRequestDTO.Forhandsvarsel(
+                            personident = ARBEIDSTAKER_PERSONIDENT.value,
+                            begrunnelse = "Begrunnelse",
+                            document = emptyList(),
+                            varselSvarfrist = LocalDate.now().plusDays(43),
+                        ),
+                        callId = "callId",
+                    )
+                }
+            }
         }
 
         @Test
@@ -115,7 +153,7 @@ class VurderingServiceTest {
                         personident = ARBEIDSTAKER_PERSONIDENT.value,
                         begrunnelse = "Begrunnelse",
                         document = emptyList(),
-                        varselSvarfrist = LocalDate.now().plusDays(14),
+                        varselSvarfrist = LocalDate.now().plusDays(21),
                     ),
                     callId = "callId",
                 )

@@ -25,7 +25,18 @@ sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
         val varsel: Varsel,
-    ) : Vurdering(VurderingType.FORHANDSVARSEL)
+    ) : Vurdering(VurderingType.FORHANDSVARSEL) {
+        companion object {
+            private val FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_SHORTEST = 21L
+            private val FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_LONGEST = 42L
+
+            fun hasValidSvarfrist(svarfrist: LocalDate): Boolean {
+                val allowedSvarfristShortest = LocalDate.now().plusDays(FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_SHORTEST)
+                val allowedSvarfristLongest = LocalDate.now().plusDays(FORHANDSVARSEL_ALLOWED_SVARFRIST_DAYS_LONGEST)
+                return !(svarfrist.isBefore(allowedSvarfristShortest) || svarfrist.isAfter(allowedSvarfristLongest))
+            }
+        }
+    }
 
     data class Oppfylt(
         override val uuid: UUID,

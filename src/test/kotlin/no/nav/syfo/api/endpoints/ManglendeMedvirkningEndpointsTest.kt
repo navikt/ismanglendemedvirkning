@@ -84,7 +84,7 @@ class ManglendeMedvirkningEndpointsTest {
                     fritekst = begrunnelse,
                     header = "Forhåndsvarsel"
                 ),
-                varselSvarfrist = LocalDate.now().plusDays(14),
+                varselSvarfrist = LocalDate.now().plusDays(21),
             )
 
             testApplication {

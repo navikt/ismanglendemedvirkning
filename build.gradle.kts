@@ -14,7 +14,7 @@ val logstashEncoderVersion = "9.0"
 val micrometerRegistryVersion = "1.12.13"
 val jacksonDatatypeVersion = "2.21.0"
 val kafkaVersion = "4.1.1"
-val ktorVersion = "3.4.0"
+val ktorVersion = "3.3.3"
 val mockkVersion = "1.14.9"
 val nimbusJoseJwtVersion = "10.7"
 

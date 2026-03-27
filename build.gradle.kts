@@ -9,17 +9,18 @@ val hikariVersion = "7.0.2"
 val postgresVersion = "42.7.9"
 val postgresEmbeddedVersion = "2.2.0"
 val postgresRuntimeVersion = "17.6.0"
-val logbackVersion = "1.5.27"
+val logbackVersion = "1.5.32"
 val logstashEncoderVersion = "9.0"
-val micrometerRegistryVersion = "1.12.13"
-val jacksonDatatypeVersion = "2.21.0"
+val micrometerRegistryVersion = "1.16.3"
+val jacksonDatatypeVersion = "2.21.1"
+val jacksonDatabindVersion = "3.1.0"
 val kafkaVersion = "4.1.1"
-val ktorVersion = "3.3.3"
+val ktorVersion = "3.4.1"
 val mockkVersion = "1.14.9"
-val nimbusJoseJwtVersion = "10.7"
+val nimbusJoseJwtVersion = "10.8"
 
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.3.10"
     id("com.gradleup.shadow") version "8.3.8"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.adarshr.test-logger") version "4.0.0"
@@ -67,21 +68,10 @@ dependencies {
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeVersion")
+    implementation("tools.jackson.core:jackson-databind:$jacksonDatabindVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion", excludeLog4j)
     constraints {
-        implementation("org.apache.avro:avro") {
-            because("io.confluent:kafka-avro-serializer:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2023-39410")
-            version {
-                require("1.12.1")
-            }
-        }
-        implementation("org.apache.commons:commons-compress") {
-            because("org.apache.commons:commons-compress:1.22 -> https://www.cve.org/CVERecord?id=CVE-2012-2098")
-            version {
-                require("1.28.0")
-            }
-        }
         implementation("commons-beanutils:commons-beanutils") {
             because("io.confluent:kafka-avro-serializer:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2025-48734")
             version {

@@ -10,7 +10,7 @@ import no.nav.syfo.util.nowUTC
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertInstanceOf
+import kotlin.test.assertIs
 import java.util.UUID
 
 class VurderingRepositoryTest {
@@ -56,7 +56,7 @@ class VurderingRepositoryTest {
             journalpostId = null,
         )
         val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
-        assertInstanceOf<Vurdering.Stans>(savedVurdering)
+        assertIs<Vurdering.Stans>(savedVurdering)
         assertEquals(vurdering.personident, savedVurdering.personident)
         assertEquals(vurdering.veilederident, savedVurdering.veilederident)
         assertEquals(vurdering.begrunnelse, savedVurdering.begrunnelse)
@@ -83,7 +83,7 @@ class VurderingRepositoryTest {
             ),
         )
         val savedVurdering = vurderingRepository.saveManglendeMedvirkningVurdering(vurdering, pdf)
-        assertInstanceOf<Vurdering.Forhandsvarsel>(savedVurdering)
+        assertIs<Vurdering.Forhandsvarsel>(savedVurdering)
         assertEquals(vurdering.personident, savedVurdering.personident)
         assertEquals(vurdering.veilederident, savedVurdering.veilederident)
         assertEquals(vurdering.begrunnelse, savedVurdering.begrunnelse)

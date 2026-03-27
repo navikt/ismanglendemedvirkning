@@ -29,11 +29,11 @@ import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.util.configure
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNotNull
 import java.time.LocalDate
 
 class ManglendeMedvirkningEndpointsTest {
@@ -456,7 +456,7 @@ class ManglendeMedvirkningEndpointsTest {
                 val responseDTO = response.body<VurderingerResponseDTO>()
                 val vurderingResponseDTO = responseDTO.vurderinger[ARBEIDSTAKER_PERSONIDENT.value]
                 assertNotNull(vurderingResponseDTO)
-                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO.personident)
+                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO!!.personident)
                 assertEquals(VurderingType.FORHANDSVARSEL, vurderingResponseDTO.vurderingType)
             }
         }
@@ -493,7 +493,7 @@ class ManglendeMedvirkningEndpointsTest {
                 val responseDTO = response.body<VurderingerResponseDTO>()
                 val vurderingResponseDTO = responseDTO.vurderinger[ARBEIDSTAKER_PERSONIDENT.value]
                 assertNotNull(vurderingResponseDTO)
-                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO.personident)
+                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO!!.personident)
                 assertEquals(VurderingType.OPPFYLT, vurderingResponseDTO.vurderingType)
             }
         }

@@ -57,7 +57,9 @@ sealed class Vurdering(val vurderingType: VurderingType) : IVurdering {
         override val document: List<DocumentComponent>,
         override val journalpostId: JournalpostId?,
         val stansdato: LocalDate,
-    ) : Vurdering(VurderingType.STANS)
+    ) : Vurdering(VurderingType.STANS) {
+        companion object {}
+    }
 
     data class IkkeAktuell(
         override val uuid: UUID,

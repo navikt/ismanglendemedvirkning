@@ -30,15 +30,15 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertInstanceOf
-import org.junit.jupiter.api.assertNotNull
-import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import java.util.concurrent.Future
+import kotlin.test.assertIs
 
 class VurderingServiceTest {
     private val externalMockEnvironment = ExternalMockEnvironment.instance
@@ -101,7 +101,7 @@ class VurderingServiceTest {
             assertEquals(VurderingType.FORHANDSVARSEL, savedVurdering.vurderingType)
             assertEquals("Begrunnelse", savedVurdering.begrunnelse)
             assertEquals(emptyList<DocumentComponent>(), savedVurdering.document)
-            assertInstanceOf<Forhandsvarsel>(savedVurdering)
+            assertIs<Forhandsvarsel>(savedVurdering)
             assertEquals(LocalDate.now().plusDays(21), savedVurdering.varsel.svarfrist)
             assertNotNull(database.getVurderingPdf(savedVurdering.uuid))
         }
@@ -173,7 +173,7 @@ class VurderingServiceTest {
             assertEquals(savedVurdering.begrunnelse, vurderingRecord.begrunnelse)
             assertEquals(savedVurdering.vurderingType, vurderingRecord.vurderingType.value)
             assertEquals(savedVurdering.vurderingType.isActive, vurderingRecord.vurderingType.isActive)
-            assertInstanceOf<Forhandsvarsel>(savedVurdering)
+            assertIs<Forhandsvarsel>(savedVurdering)
             assertEquals(savedVurdering.varsel.svarfrist, vurderingRecord.varsel?.svarfrist)
         }
 
@@ -202,7 +202,7 @@ class VurderingServiceTest {
             val vurderingRecord = producerRecordSlot.captured.value()
 
             assertEquals(stansVurdering.uuid, vurderingRecord.uuid)
-            assertInstanceOf<Vurdering.Stans>(stansVurdering)
+            assertIs<Vurdering.Stans>(stansVurdering)
             assertEquals(stansVurdering.stansdato, vurderingRecord.stansDato)
         }
     }
@@ -231,7 +231,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(journalfortVurdering.uuid)
             assertNotNull(pVurdering)
-            assertTrue(pVurdering.updatedAt > pVurdering.createdAt)
+            assertTrue(pVurdering!!.updatedAt > pVurdering.createdAt)
             assertEquals(VurderingType.FORHANDSVARSEL, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }
@@ -256,7 +256,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(journalfortVurdering.uuid)
             assertNotNull(pVurdering)
-            assertTrue(pVurdering.updatedAt > pVurdering.createdAt)
+            assertTrue(pVurdering!!.updatedAt > pVurdering.createdAt)
             assertEquals(VurderingType.OPPFYLT, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }
@@ -278,7 +278,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(vurderingStans.uuid)
             assertNotNull(pVurdering)
-            assertEquals(VurderingType.STANS, pVurdering.type)
+            assertEquals(VurderingType.STANS, pVurdering!!.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }
 
@@ -302,7 +302,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(journalfortVurdering.uuid)
             assertNotNull(pVurdering)
-            assertTrue(pVurdering.updatedAt > pVurdering.createdAt)
+            assertTrue(pVurdering!!.updatedAt > pVurdering.createdAt)
             assertEquals(VurderingType.IKKE_AKTUELL, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }

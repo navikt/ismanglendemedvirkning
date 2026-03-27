@@ -29,12 +29,12 @@ import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.util.configure
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import kotlin.test.assertNotNull
 
 class ManglendeMedvirkningEndpointsTest {
 

@@ -30,8 +30,8 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertNotNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -231,7 +231,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(journalfortVurdering.uuid)
             assertNotNull(pVurdering)
-            assertTrue(pVurdering!!.updatedAt > pVurdering.createdAt)
+            assertTrue(pVurdering.updatedAt > pVurdering.createdAt)
             assertEquals(VurderingType.FORHANDSVARSEL, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }
@@ -256,7 +256,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(journalfortVurdering.uuid)
             assertNotNull(pVurdering)
-            assertTrue(pVurdering!!.updatedAt > pVurdering.createdAt)
+            assertTrue(pVurdering.updatedAt > pVurdering.createdAt)
             assertEquals(VurderingType.OPPFYLT, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }
@@ -278,7 +278,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(vurderingStans.uuid)
             assertNotNull(pVurdering)
-            assertEquals(VurderingType.STANS, pVurdering!!.type)
+            assertEquals(VurderingType.STANS, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }
 
@@ -302,7 +302,7 @@ class VurderingServiceTest {
 
             val pVurdering = database.getVurdering(journalfortVurdering.uuid)
             assertNotNull(pVurdering)
-            assertTrue(pVurdering!!.updatedAt > pVurdering.createdAt)
+            assertTrue(pVurdering.updatedAt > pVurdering.createdAt)
             assertEquals(VurderingType.IKKE_AKTUELL, pVurdering.type)
             assertEquals(mockedJournalpostId.toString(), pVurdering.journalpostId?.value)
         }

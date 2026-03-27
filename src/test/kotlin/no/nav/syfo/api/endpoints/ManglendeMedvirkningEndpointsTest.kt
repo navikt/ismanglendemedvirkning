@@ -456,7 +456,7 @@ class ManglendeMedvirkningEndpointsTest {
                 val responseDTO = response.body<VurderingerResponseDTO>()
                 val vurderingResponseDTO = responseDTO.vurderinger[ARBEIDSTAKER_PERSONIDENT.value]
                 assertNotNull(vurderingResponseDTO)
-                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO!!.personident)
+                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO.personident)
                 assertEquals(VurderingType.FORHANDSVARSEL, vurderingResponseDTO.vurderingType)
             }
         }
@@ -493,7 +493,7 @@ class ManglendeMedvirkningEndpointsTest {
                 val responseDTO = response.body<VurderingerResponseDTO>()
                 val vurderingResponseDTO = responseDTO.vurderinger[ARBEIDSTAKER_PERSONIDENT.value]
                 assertNotNull(vurderingResponseDTO)
-                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO!!.personident)
+                assertEquals(ARBEIDSTAKER_PERSONIDENT.value, vurderingResponseDTO.personident)
                 assertEquals(VurderingType.OPPFYLT, vurderingResponseDTO.vurderingType)
             }
         }

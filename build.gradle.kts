@@ -4,7 +4,7 @@ group = "no.nav.syfo"
 version = "0.0.1"
 
 val confluentVersion = "8.1.1"
-val flywayVersion = "11.19.0"
+val flywayVersion = "12.0.3"
 val hikariVersion = "7.0.2"
 val postgresVersion = "42.7.9"
 val postgresEmbeddedVersion = "2.2.0"

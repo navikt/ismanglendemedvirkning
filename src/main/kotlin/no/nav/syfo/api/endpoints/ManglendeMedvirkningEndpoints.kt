@@ -1,7 +1,6 @@
 package no.nav.syfo.api.endpoints
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -53,6 +52,7 @@ fun Route.registerManglendeMedvirkningEndpoints(
                 action = "POST /vurderinger",
                 personident = Personident(requestDTO.personident),
                 veilederTilgangskontrollClient = veilederTilgangskontrollClient,
+                requiresWriteAccess = true,
             ) {
                 val callId = call.getCallId()
                 if (requestDTO.document.isEmpty()) {

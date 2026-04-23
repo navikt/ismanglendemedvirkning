@@ -11,6 +11,7 @@ object UserConstants {
     val ARBEIDSTAKER_PERSONIDENT_NO_NAME = Personident("11111111222")
     val ARBEIDSTAKER_PERSONIDENT_PDL_FAILS = Personident("11111111666")
     val VEILEDER_IDENT = Veilederident("Z999999")
+    val VEILEDER_IDENT_NO_WRITE_ACCESS = Veilederident("Z888888")
 
     const val PERSON_FORNAVN = "Fornavn"
     const val PERSON_MELLOMNAVN = "Mellomnavn"

@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.testing.*
 import no.nav.syfo.ExternalMockEnvironment
+import no.nav.syfo.UserConstants
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT
 import no.nav.syfo.UserConstants.ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS
 import no.nav.syfo.UserConstants.PDF_FORHANDSVARSEL
@@ -63,6 +64,11 @@ class ManglendeMedvirkningEndpointsTest {
         audience = externalMockEnvironment.environment.azure.appClientId,
         issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
         navIdent = VEILEDER_IDENT,
+    )
+    private val noWriteAccessToken = generateJWT(
+        audience = externalMockEnvironment.environment.azure.appClientId,
+        issuer = externalMockEnvironment.wellKnownInternalAzureAD.issuer,
+        navIdent = UserConstants.VEILEDER_IDENT_NO_WRITE_ACCESS,
     )
 
     @BeforeEach
@@ -296,6 +302,30 @@ class ManglendeMedvirkningEndpointsTest {
                     contentType(ContentType.Application.Json)
                     bearerAuth(validToken)
                     header(NAV_PERSONIDENT_HEADER, ARBEIDSTAKER_PERSONIDENT_VEILEDER_NO_ACCESS.value)
+                    setBody(forhandsvarselRequestDTO)
+                }
+
+                assertEquals(HttpStatusCode.Forbidden, response.status)
+            }
+        }
+
+        @Test
+        fun `returns status Forbidden if no write access`() {
+            val forhandsvarselRequestDTO = NewVurderingRequestDTO.Forhandsvarsel(
+                personident = ARBEIDSTAKER_PERSONIDENT.value,
+                begrunnelse = "Fin begrunnelse",
+                document = generateDocumentComponent(
+                    fritekst = begrunnelse,
+                    header = "Forhåndsvarsel"
+                ),
+                varselSvarfrist = LocalDate.now().plusDays(21),
+            )
+
+            testApplication {
+                val client = setupApiAndClient()
+                val response = client.post("$urlVurderinger/vurderinger") {
+                    contentType(ContentType.Application.Json)
+                    bearerAuth(noWriteAccessToken)
                     setBody(forhandsvarselRequestDTO)
                 }
 

@@ -22,7 +22,6 @@ data class Environment(
         AzureEnvironment(
             appClientId = getEnvVar("AZURE_APP_CLIENT_ID"),
             appClientSecret = getEnvVar("AZURE_APP_CLIENT_SECRET"),
-            appWellKnownUrl = getEnvVar("AZURE_APP_WELL_KNOWN_URL"),
             openidConfigTokenEndpoint = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT")
         ),
     val electorPath: String = getEnvVar("ELECTOR_PATH"),

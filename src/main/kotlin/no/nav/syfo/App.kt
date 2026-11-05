@@ -8,13 +8,15 @@ import io.ktor.server.netty.*
 import no.nav.syfo.api.apiModule
 import no.nav.syfo.application.VarselService
 import no.nav.syfo.application.VurderingService
+import no.nav.syfo.common.journalforing.client.DokarkivClient
+import no.nav.syfo.common.token.texas.EntraIdClient
+import no.nav.syfo.common.util.ClientConfig
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
-import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
 import no.nav.syfo.infrastructure.clients.pdfgen.PdfGenClient
 import no.nav.syfo.infrastructure.clients.pdfgen.VurderingPdfService
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
-import no.nav.syfo.infrastructure.clients.wellknown.getWellKnown
+import no.nav.syfo.common.auth.getWellKnownFromEnv
 import no.nav.syfo.infrastructure.cronjob.launchCronjobs
 import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
@@ -32,7 +34,6 @@ import no.nav.syfo.infrastructure.kafka.identhendelse.launchIdenthendelseConsume
 import no.nav.syfo.infrastructure.kafka.kafkaAivenProducerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.slf4j.LoggerFactory
-import java.util.concurrent.TimeUnit
 
 const val applicationPort = 8080
 
@@ -41,9 +42,7 @@ fun main() {
     val environment = Environment()
     val logger = LoggerFactory.getLogger("ktor.application")
 
-    val wellKnownInternalAzureAD = getWellKnown(
-        wellKnownUrl = environment.azure.appWellKnownUrl,
-    )
+    val wellKnownInternalAzureAD = getWellKnownFromEnv()
     val azureAdClient = AzureAdClient(
         azureEnvironment = environment.azure
     )
@@ -52,8 +51,11 @@ fun main() {
         pdlEnvironment = environment.clients.pdl,
     )
     val dokarkivClient = DokarkivClient(
-        azureAdClient = azureAdClient,
-        dokarkivEnvironment = environment.clients.dokarkiv,
+        systemTokenProvider = EntraIdClient(),
+        clientConfig = ClientConfig(
+            baseUrl = environment.clients.dokarkiv.baseUrl,
+            clientId = environment.clients.dokarkiv.clientId,
+        ),
     )
     val veilederTilgangskontrollClient = VeilederTilgangskontrollClient(
         azureAdClient = azureAdClient,
@@ -151,12 +153,11 @@ fun main() {
                     )
                 )
             }
+            monitor.subscribe(ApplicationStopping) {
+                applicationState.ready = false
+                logger.info("Application is stopping")
+            }
         }
     )
-
-    Runtime.getRuntime().addShutdownHook(
-        Thread { server.stop(10, 10, TimeUnit.SECONDS) }
-    )
-
     server.start(wait = true)
 }

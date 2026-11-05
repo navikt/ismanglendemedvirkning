@@ -18,6 +18,7 @@ val kafkaVersion = "4.3.1"
 val ktorVersion = "3.6.0"
 val mockkVersion = "1.14.11"
 val nimbusJoseJwtVersion = "10.10"
+val isyfoBackendCommonVersion = "1.3.3"
 
 plugins {
     kotlin("jvm") version "2.4.20"
@@ -29,13 +30,15 @@ plugins {
 repositories {
     mavenCentral()
     maven(url = "https://packages.confluent.io/maven/")
+    maven(url = "https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
+    implementation("no.nav.syfo:isyfo-backend-common:$isyfoBackendCommonVersion")
 
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")

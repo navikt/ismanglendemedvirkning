@@ -15,9 +15,10 @@ import io.ktor.server.routing.*
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import no.nav.syfo.ApplicationState
 import no.nav.syfo.Environment
-import no.nav.syfo.api.auth.JwtIssuer
-import no.nav.syfo.api.auth.JwtIssuerType
-import no.nav.syfo.api.auth.installJwtAuthentication
+import no.nav.syfo.common.auth.JwtIssuer
+import no.nav.syfo.common.auth.JwtIssuerType
+import no.nav.syfo.common.auth.WellKnown
+import no.nav.syfo.common.auth.installJwtAuthentication
 import no.nav.syfo.api.endpoints.metricEndpoints
 import no.nav.syfo.api.endpoints.podEndpoints
 import no.nav.syfo.api.endpoints.registerManglendeMedvirkningEndpoints
@@ -25,7 +26,6 @@ import no.nav.syfo.application.VurderingService
 import no.nav.syfo.infrastructure.NAV_CALL_ID_HEADER
 import no.nav.syfo.infrastructure.clients.veiledertilgang.ForbiddenAccessVeilederException
 import no.nav.syfo.infrastructure.clients.veiledertilgang.VeilederTilgangskontrollClient
-import no.nav.syfo.infrastructure.clients.wellknown.WellKnown
 import no.nav.syfo.infrastructure.database.DatabaseInterface
 import no.nav.syfo.infrastructure.metric.METRICS_REGISTRY
 import no.nav.syfo.util.configure

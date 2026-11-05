@@ -23,6 +23,4 @@ object UserConstants {
     val PDF_FORHANDSVARSEL = byteArrayOf(0x2E, 0x28)
     val PDF_VURDERING = byteArrayOf(0x2E, 0x30)
     val PDF_STANS = byteArrayOf(0x2E, 0x32)
-
-    val EXISTING_EKSTERN_REFERANSE_UUID: UUID = UUID.fromString("e7e8e9e0-e1e2-e3e4-e5e6-e7e8e9e0e1e2")
 }

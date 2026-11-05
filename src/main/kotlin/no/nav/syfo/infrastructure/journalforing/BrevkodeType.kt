@@ -1,10 +1,11 @@
-package no.nav.syfo.infrastructure.clients.dokarkiv.dto
+package no.nav.syfo.infrastructure.journalforing
 
+import no.nav.syfo.common.journalforing.Brevkode
 import no.nav.syfo.domain.VurderingType
 
 enum class BrevkodeType(
-    val value: String,
-) {
+    override val value: String,
+) : Brevkode {
     MANGLENDE_MEDVIRKNING_FORHANDSVARSEL("OPPF_MANGLENDE_MEDVIRKNING_FORHANDSVARSEL"),
     MANGLENDE_MEDVIRKNING_VURDERING("OPPF_MANGLENDE_MEDVIRKNING_VURDERING"),
     MANGLENDE_MEDVIRKNING_STANS("OPPF_MANGLENDE_MEDVIRKNING_STANS");
@@ -18,9 +19,3 @@ enum class BrevkodeType(
             }
     }
 }
-
-data class Dokument(
-    val brevkode: String,
-    val dokumentvarianter: List<Dokumentvariant>,
-    val tittel: String? = null,
-)

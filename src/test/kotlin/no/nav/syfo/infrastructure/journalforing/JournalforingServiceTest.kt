@@ -13,9 +13,8 @@ import no.nav.syfo.UserConstants.PDF_VURDERING
 import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.generator.generateJournalpostRequest
 import no.nav.syfo.generator.generateVurdering
-import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
-import no.nav.syfo.infrastructure.clients.dokarkiv.dto.BrevkodeType
-import no.nav.syfo.infrastructure.clients.dokarkiv.dto.JournalpostType
+import no.nav.syfo.common.journalforing.client.DokarkivClient
+import no.nav.syfo.common.journalforing.dto.JournalpostType
 import no.nav.syfo.infrastructure.mock.dokarkivResponse
 import no.nav.syfo.infrastructure.mock.mockedJournalpostId
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -57,7 +56,7 @@ class JournalforingServiceTest {
                     brevkodeType = BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING,
                     pdf = PDF_VURDERING,
                     vurderingUuid = vurderingOppfylt.uuid,
-                    journalpostType = JournalpostType.UTGAAENDE.name,
+                    journalpostType = JournalpostType.UTGAAENDE,
                 )
             )
         }
@@ -83,7 +82,7 @@ class JournalforingServiceTest {
                     brevkodeType = BrevkodeType.MANGLENDE_MEDVIRKNING_FORHANDSVARSEL,
                     pdf = PDF_FORHANDSVARSEL,
                     vurderingUuid = vurderingForhandsvarsel.uuid,
-                    journalpostType = JournalpostType.UTGAAENDE.name,
+                    journalpostType = JournalpostType.UTGAAENDE,
                 )
             )
         }
@@ -109,7 +108,7 @@ class JournalforingServiceTest {
                     brevkodeType = BrevkodeType.MANGLENDE_MEDVIRKNING_STANS,
                     pdf = PDF_STANS,
                     vurderingUuid = vurderingStans.uuid,
-                    journalpostType = JournalpostType.NOTAT.name,
+                    journalpostType = JournalpostType.NOTAT,
                 )
             )
         }
@@ -135,7 +134,7 @@ class JournalforingServiceTest {
                     brevkodeType = BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING,
                     pdf = PDF_VURDERING,
                     vurderingUuid = vurderingIkkeAktuell.uuid,
-                    journalpostType = JournalpostType.UTGAAENDE.name,
+                    journalpostType = JournalpostType.UTGAAENDE,
                 )
             )
         }
@@ -161,7 +160,7 @@ class JournalforingServiceTest {
                     brevkodeType = BrevkodeType.MANGLENDE_MEDVIRKNING_VURDERING,
                     pdf = PDF_VURDERING,
                     vurderingUuid = vurderingUnntak.uuid,
-                    journalpostType = JournalpostType.UTGAAENDE.name,
+                    journalpostType = JournalpostType.UTGAAENDE,
                 )
             )
         }

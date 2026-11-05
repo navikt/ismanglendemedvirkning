@@ -8,6 +8,8 @@ import io.ktor.server.netty.*
 import no.nav.syfo.api.apiModule
 import no.nav.syfo.application.VarselService
 import no.nav.syfo.application.VurderingService
+import no.nav.syfo.common.distribusjon.client.DokdistfordelingClient
+import no.nav.syfo.common.http.proxyHttpClient
 import no.nav.syfo.common.journalforing.client.DokarkivClient
 import no.nav.syfo.common.token.texas.EntraIdClient
 import no.nav.syfo.common.util.ClientConfig
@@ -22,12 +24,10 @@ import no.nav.syfo.infrastructure.database.applicationDatabase
 import no.nav.syfo.infrastructure.database.databaseModule
 import no.nav.syfo.infrastructure.database.repository.VarselRepository
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
+import no.nav.syfo.infrastructure.distribusjon.DistribusjonService
 import no.nav.syfo.infrastructure.journalforing.JournalforingService
-import no.nav.syfo.infrastructure.kafka.VarselProducer
 import no.nav.syfo.infrastructure.kafka.VurderingProducer
 import no.nav.syfo.infrastructure.kafka.VurderingRecordSerializer
-import no.nav.syfo.infrastructure.kafka.esyfovarsel.EsyfoVarselHendelseSerializer
-import no.nav.syfo.infrastructure.kafka.esyfovarsel.EsyfovarselHendelseProducer
 import no.nav.syfo.infrastructure.kafka.identhendelse.IdenthendelseConsumer
 import no.nav.syfo.infrastructure.kafka.identhendelse.IdenthendelseService
 import no.nav.syfo.infrastructure.kafka.identhendelse.launchIdenthendelseConsumer
@@ -64,10 +64,15 @@ fun main() {
     val pdfGenClient = PdfGenClient(
         pdfGenBaseUrl = environment.clients.ispdfgen.baseUrl,
     )
-    val arbeidstakerForhandsvarselProducer = EsyfovarselHendelseProducer(
-        producer = KafkaProducer(
-            kafkaAivenProducerConfig<EsyfoVarselHendelseSerializer>(kafkaEnvironment = environment.kafka)
-        )
+    val dokdistClient = DistribusjonService(
+        dokdistfordelingClient = DokdistfordelingClient(
+            systemTokenProvider = EntraIdClient(),
+            clientConfig = ClientConfig(
+                baseUrl = environment.clients.dokdistfordeling.baseUrl,
+                clientId = environment.clients.dokdistfordeling.clientId,
+            ),
+            httpClient = proxyHttpClient(),
+        ),
     )
     val vurderingProducer = VurderingProducer(
         producer = KafkaProducer(kafkaAivenProducerConfig<VurderingRecordSerializer>(kafkaEnvironment = environment.kafka))
@@ -120,9 +125,7 @@ fun main() {
             )
             varselService = VarselService(
                 varselRepository = varselRepository,
-                varselProducer = VarselProducer(
-                    arbeidstakerForhandsvarselProducer = arbeidstakerForhandsvarselProducer,
-                ),
+                dokdistClient = dokdistClient,
             )
 
             apiModule(

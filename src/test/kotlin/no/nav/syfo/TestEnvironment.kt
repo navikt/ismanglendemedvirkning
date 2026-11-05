@@ -29,7 +29,6 @@ fun testEnvironment() = Environment(
     azure = AzureEnvironment(
         appClientId = "ismanglendemedvirkning-client-id",
         appClientSecret = "ismanglendemedvirkning-secret",
-        appWellKnownUrl = "wellknown",
         openidConfigTokenEndpoint = "azureOpenIdTokenEndpoint",
     ),
     clients = ClientsEnvironment(

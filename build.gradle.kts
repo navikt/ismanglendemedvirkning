@@ -3,24 +3,25 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 group = "no.nav.syfo"
 version = "0.0.1"
 
-val confluentVersion = "8.3.0"
+val confluentVersion = "8.4.0"
 val flywayVersion = "11.19.0"
 val hikariVersion = "7.1.0"
-val postgresVersion = "42.7.13"
+val postgresVersion = "42.7.14"
 val postgresEmbeddedVersion = "2.2.2"
 val postgresRuntimeVersion = "17.9.0"
-val logbackVersion = "1.6.5"
+val logbackVersion = "1.6.6"
 val logstashEncoderVersion = "9.0"
-val micrometerRegistryVersion = "1.17.1"
-val jacksonDatatypeVersion = "2.22.3"
-val jacksonDatabindVersion = "3.2.3"
-val kafkaVersion = "4.3.1"
-val ktorVersion = "3.6.0"
+val micrometerRegistryVersion = "1.17.2"
+val jacksonDatatypeVersion = "2.22.4"
+val jacksonDatabindVersion = "3.2.4"
+val kafkaVersion = "4.4.0"
+val ktorVersion = "3.6.1"
 val mockkVersion = "1.14.11"
 val nimbusJoseJwtVersion = "10.10"
+val isyfoBackendCommonVersion = "1.3.3"
 
 plugins {
-    kotlin("jvm") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
     id("com.gradleup.shadow") version "8.3.8"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.adarshr.test-logger") version "4.0.0"
@@ -29,13 +30,15 @@ plugins {
 repositories {
     mavenCentral()
     maven(url = "https://packages.confluent.io/maven/")
+    maven(url = "https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
+    implementation("no.nav.syfo:isyfo-backend-common:$isyfoBackendCommonVersion")
 
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")

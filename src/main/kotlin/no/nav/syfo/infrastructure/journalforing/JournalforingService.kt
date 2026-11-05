@@ -1,10 +1,19 @@
 package no.nav.syfo.infrastructure.journalforing
 
 import no.nav.syfo.application.IJournalforingService
-import no.nav.syfo.domain.*
-import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
-import no.nav.syfo.infrastructure.clients.dokarkiv.dto.*
+import no.nav.syfo.common.journalforing.JournalpostMottaker
+import no.nav.syfo.common.journalforing.client.DokarkivClient
+import no.nav.syfo.common.journalforing.createJournalpostRequest
+import no.nav.syfo.common.journalforing.dto.Bruker
+import no.nav.syfo.common.journalforing.dto.BrukerIdType
+import no.nav.syfo.common.journalforing.dto.JournalpostKanal
+import no.nav.syfo.common.journalforing.dto.JournalpostRequest
+import no.nav.syfo.common.journalforing.dto.JournalpostType
+import no.nav.syfo.domain.Personident
+import no.nav.syfo.domain.Vurdering
+import no.nav.syfo.domain.VurderingType
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
+import no.nav.syfo.common.types.ident.Personident as CommonPersonident
 import org.slf4j.LoggerFactory
 
 class JournalforingService(
@@ -26,7 +35,7 @@ class JournalforingService(
         )
 
         return try {
-            dokarkivClient.journalfor(journalpostRequest).journalpostId
+            dokarkivClient.journalfor(journalpostRequest).journalpostId.value.toInt()
         } catch (exc: Exception) {
             if (isJournalforingRetryEnabled) {
                 throw exc
@@ -46,45 +55,21 @@ class JournalforingService(
         pdf: ByteArray,
         vurdering: Vurdering,
     ): JournalpostRequest {
-        val journalpostType = JournalpostType.fromVurderingType(vurdering.vurderingType)
-        val avsenderMottaker = if (journalpostType == JournalpostType.NOTAT) {
-            null
-        } else {
-            AvsenderMottaker(
+        val journalpostType = vurdering.vurderingType.journalpostType()
+        val isNotat = journalpostType == JournalpostType.NOTAT
+
+        return createJournalpostRequest(
+            bruker = Bruker(
                 id = personIdent.value,
-                idType = BrukerIdType.PERSON_IDENT.value,
-                navn = navn,
-            )
-        }
-        val bruker = Bruker(
-            id = personIdent.value,
-            idType = BrukerIdType.PERSON_IDENT.value,
-        )
-
-        val dokumentTittel = vurdering.vurderingType.dokumentTittel()
-
-        val dokumenter = listOf(
-            Dokument(
-                brevkode = BrevkodeType.fromVurderingType(vurdering.vurderingType).value,
-                dokumentvarianter = listOf(
-                    Dokumentvariant(
-                        filnavn = dokumentTittel,
-                        filtype = Filtype.PDFA.value,
-                        fysiskDokument = pdf,
-                        variantformat = Variantformat.ARKIV.value,
-                    )
-                ),
-                tittel = dokumentTittel,
-            )
-        )
-
-        return JournalpostRequest(
-            journalpostType = JournalpostType.fromVurderingType(vurdering.vurderingType).name,
-            avsenderMottaker = avsenderMottaker,
-            tittel = dokumentTittel,
-            bruker = bruker,
-            dokumenter = dokumenter,
+                idType = BrukerIdType.PERSONIDENT.value,
+            ),
+            brevkode = BrevkodeType.fromVurderingType(vurdering.vurderingType),
+            tittel = vurdering.vurderingType.dokumentTittel(),
+            pdf = pdf,
             eksternReferanseId = vurdering.uuid.toString(),
+            journalpostType = journalpostType,
+            mottaker = if (isNotat) null else JournalpostMottaker.Person(CommonPersonident(personIdent.value), navn),
+            kanal = if (isNotat) null else JournalpostKanal.DITT_NAV,
         )
     }
 
@@ -93,6 +78,12 @@ class JournalforingService(
         private val log = LoggerFactory.getLogger(JournalforingService::class.java)
     }
 }
+
+private fun VurderingType.journalpostType(): JournalpostType =
+    when (this) {
+        VurderingType.FORHANDSVARSEL, VurderingType.OPPFYLT, VurderingType.IKKE_AKTUELL, VurderingType.UNNTAK -> JournalpostType.UTGAAENDE
+        VurderingType.STANS -> JournalpostType.NOTAT
+    }
 
 fun VurderingType.dokumentTittel(): String =
     when (this) {

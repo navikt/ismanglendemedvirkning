@@ -1,10 +1,13 @@
 package no.nav.syfo
 
+import no.nav.syfo.common.journalforing.client.DokarkivClient
+import no.nav.syfo.common.token.SystemTokenProvider
+import no.nav.syfo.common.util.ClientConfig
 import no.nav.syfo.infrastructure.clients.azuread.AzureAdClient
-import no.nav.syfo.infrastructure.clients.dokarkiv.DokarkivClient
+import no.nav.syfo.infrastructure.mock.dokarkivMockHttpClient
 import no.nav.syfo.infrastructure.clients.pdfgen.PdfGenClient
 import no.nav.syfo.infrastructure.clients.pdl.PdlClient
-import no.nav.syfo.infrastructure.clients.wellknown.WellKnown
+import no.nav.syfo.common.auth.WellKnown
 import no.nav.syfo.infrastructure.database.TestDatabase
 import no.nav.syfo.infrastructure.database.repository.VurderingRepository
 import no.nav.syfo.infrastructure.mock.mockHttpClient
@@ -35,9 +38,14 @@ class ExternalMockEnvironment private constructor() {
         httpClient = mockHttpClient,
     )
     val dokarkivClient = DokarkivClient(
-        azureAdClient = azureAdClient,
-        dokarkivEnvironment = environment.clients.dokarkiv,
-        httpClient = mockHttpClient,
+        systemTokenProvider = object : SystemTokenProvider {
+            override suspend fun getSystemToken(targetClientId: String): String? = "token"
+        },
+        clientConfig = ClientConfig(
+            baseUrl = environment.clients.dokarkiv.baseUrl,
+            clientId = environment.clients.dokarkiv.clientId,
+        ),
+        httpClient = dokarkivMockHttpClient(),
     )
     val pdfgenClient = PdfGenClient(
         pdfGenBaseUrl = environment.clients.ispdfgen.baseUrl,

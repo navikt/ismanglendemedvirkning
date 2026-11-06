@@ -44,6 +44,10 @@ fun testEnvironment() = Environment(
             baseUrl = "dokarkivUrl",
             clientId = "dokarkivClientId",
         ),
+        dokdistfordeling = ClientEnvironment(
+            baseUrl = "https://dokdistfordeling",
+            clientId = "dokdistfordelingClientId",
+        ),
         ispdfgen = OpenClientEnvironment(
             baseUrl = "ispdfgenUrl",
         ),

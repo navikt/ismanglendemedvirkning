@@ -35,7 +35,7 @@ class DistribusjonServiceTest {
             val body = request.receiveBody<DistribuerJournalpostRequest>()
             assertEquals("123", body.journalpostId)
             assertEquals("MODIA_SYFO", body.bestillendeFagsystem)
-            assertEquals("ismanglendemedvirkning", body.dokumentProdApp)
+            assertEquals("ismanglendemedvirkni", body.dokumentProdApp)
             assertEquals("VIKTIG", body.distribusjonstype)
             assertEquals("KJERNETID", body.distribusjonstidspunkt)
             respond(

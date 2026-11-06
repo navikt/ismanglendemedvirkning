@@ -14,7 +14,7 @@ class DistribusjonService(
         val request = createDistribuerJournalpostRequest(
             journalpostId = journalpostId.value,
             bestillendeFagsystem = "MODIA_SYFO",
-            dokumentProdApp = "ismanglendemedvirkning",
+            dokumentProdApp = "ismanglendemedvirkni", // Feltet dokumentProdapp kan ikke være mer enn 20 tegn
             distribusjonstype = Distribusjonstype.VIKTIG,
             distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
         )

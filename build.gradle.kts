@@ -12,11 +12,11 @@ val postgresRuntimeVersion = "17.9.0"
 val logbackVersion = "1.6.6"
 val logstashEncoderVersion = "9.0"
 val micrometerRegistryVersion = "1.17.2"
-val jacksonDatatypeVersion = "2.22.4"
-val jacksonDatabindVersion = "3.2.4"
+val jacksonDatatypeVersion = "2.23.0"
+val jacksonDatabindVersion = "3.3.0"
 val kafkaVersion = "4.4.0"
 val ktorVersion = "3.6.1"
-val mockkVersion = "1.14.11"
+val mockkVersion = "1.14.12"
 val nimbusJoseJwtVersion = "10.10"
 val isyfoBackendCommonVersion = "1.3.3"
 
@@ -68,6 +68,13 @@ dependencies {
         exclude(group = "org.apache.logging.log4j")
     }
     implementation("org.apache.kafka:kafka_2.13:$kafkaVersion", excludeLog4j)
+    constraints {
+        implementation("at.yawk.lz4:lz4-java") {
+            version {
+                require("1.11.4")
+            }
+        }
+    }
 
     // (De-)serialization
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonDatatypeVersion")
@@ -75,10 +82,9 @@ dependencies {
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion", excludeLog4j)
     constraints {
-        implementation("commons-beanutils:commons-beanutils") {
-            because("io.confluent:kafka-avro-serializer:$confluentVersion -> https://www.cve.org/CVERecord?id=CVE-2025-48734")
+        implementation("com.google.guava:guava") {
             version {
-                require("1.11.0")
+                require("33.8.0-jre")
             }
         }
     }
